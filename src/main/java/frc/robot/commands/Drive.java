@@ -20,6 +20,8 @@ public class Drive extends Command {
   DriveSubsystem driveSubsystem;
   CommandJoystick vroomVroomStick;
   Joystick steeringWheel;
+  double steeringWheelTurning;
+  double flightTurning;
   double turning;
   double turnValue;
   double drive;
@@ -44,17 +46,19 @@ public class Drive extends Command {
   // controllable.
   @Override
   public void execute() {
-    turning = MathUtil.applyDeadband(steeringWheel.getX(), 0.07);
-    turnValue = constrain(1, -1, (Math.abs(turning)/turning)*Math.sqrt(Math.abs(6.5*turning)));
+
+    steeringWheelTurning = MathUtil.applyDeadband(steeringWheel.getX(), 0.07);
+    flightTurning = MathUtil.applyDeadband(vroomVroomStick.getZ(), 0.3)*0.2;
+
+    turning = max(steeringWheelTurning, flightTurning);
+    //turning = MathUtil.applyDeadband(steeringWheel.getX(), 0.07);
+    //turnValue = constrain(1, -1, (Math.abs(turning)/turning)*Math.sqrt(Math.abs(6.5*turning)));
+    turnValue = constrain(1, -1, turning*2);
     drive = -constrain(1, -1, 2*vroomVroomStick.getY());
-    System.out.println("Drive value" + drive);
-    System.out.println("Turning" + turning);
-
-
-    // driveSubsystem.driveArcade(-constrain(1, -1, 2*vroomVroomStick.getY()), 
+    // driveSubsystem.driveArcade(-constrain(1, -1, 2*vroomVroomStick.getY()),
     //         constrain(1, -1, Math.abs(turning)/turning)*Math.sqrt(Math.abs(2.5*turning)));
 
-    driveSubsystem.driveArcade(drive, turning);
+    driveSubsystem.driveArcade(drive, -turnValue);
 
 
   
@@ -89,5 +93,20 @@ public class Drive extends Command {
           input = low;
       }
       return input;
+  }
+
+  /**
+   * returns what one is farther from 0
+   * 
+   * @param num1
+   * @param num2
+   * @return
+   */
+  public double max(double num1, double num2){
+    if(Math.abs(num1) > Math.abs(num2)){
+      return num1;
+    }else{
+      return num2;
+    }
   }
 }

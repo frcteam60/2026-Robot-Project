@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.PWM1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -55,16 +56,18 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 //import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 
 public class DriveSubsystem extends SubsystemBase {
-  private final WPI_TalonSRX leftLeader;
-  private final WPI_TalonSRX leftFollower;
-  private final WPI_TalonSRX rightLeader;
-  private final WPI_TalonSRX rightFollower;
+  // private final WPI_TalonSRX leftLeader;
+  // private final WPI_TalonSRX leftFollower;
+  // private final WPI_TalonSRX rightLeader;
+  // private final WPI_TalonSRX rightFollower;
+
   private Pose2d oldRobotPose = new Pose2d(); 
   private long oldTimeSample = 0;
   private int count = 0;
@@ -74,10 +77,10 @@ public class DriveSubsystem extends SubsystemBase {
   //private final Solenoid leftShifter;
   //private final Solenoid rightShifter;
 
-  // private final TalonFX leftLeader;
-  // private final TalonFX leftFollower;
-  // private final TalonFX rightLeader;
-  // private final TalonFX rightFollower;
+  private final TalonFX leftLeader;
+  private final TalonFX leftFollower;
+  private final TalonFX rightLeader;
+  private final TalonFX rightFollower;
 
   private final AHRS gyroThePirate;
   private final Vision vision;
@@ -96,40 +99,62 @@ public class DriveSubsystem extends SubsystemBase {
      
     //leftShifter = new Solenoid(PneumaticsModuleType.REVPH, 0);
     //rightShifter = new Solenoid(PneumaticsModuleType.REVPH, 1);
-    // leftLeader = new TalonFX(3);
-    // leftFollower = new TalonFX(4);
 
-    // rightLeader = new TalonFX(1);
-    // rightFollower = new TalonFX(2);
+    leftLeader = new TalonFX(1);
+    leftFollower = new TalonFX(2);
 
-    // var backConfiguration = new TalonFXConfiguration();
-    // var frontConfiguration = new TalonFXConfiguration();
+    rightLeader = new TalonFX(5);
+    rightFollower = new TalonFX(4);
 
-    // leftLeader.getConfigurator().apply(frontConfiguration);
-    // leftFollower.getConfigurator().apply(backConfiguration);
-    // rightLeader.getConfigurator().apply(frontConfiguration);
-    // rightFollower.getConfigurator().apply(backConfiguration);
+    TalonFXConfiguration leftConfiguration = new TalonFXConfiguration();
+    TalonFXConfiguration rightConfiguration = new TalonFXConfiguration();
 
-    // /* Set up followers to follow leaders */
-    // leftFollower.setControl(new Follower(leftLeader.getDeviceID(), MotorAlignmentValue.Aligned));
-    // rightFollower.setControl(new Follower(rightLeader.getDeviceID(), MotorAlignmentValue.Aligned));
+    // need to know if need to invert same side motors
+    leftConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    rightConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    var leftLeaderConfigurator = leftLeader.getConfigurator();
+    var leftFollowerConfigurator = leftFollower.getConfigurator();
+    var rightLeaderConfigurator = rightLeader.getConfigurator();
+    var rightFollowerConfigurator = rightFollower.getConfigurator();
+
+    var limitConfigs = new CurrentLimitsConfigs();
+    // enable stator current limit
+    limitConfigs.StatorCurrentLimit = 80;
+    limitConfigs.SupplyCurrentLimit = 40;
+    limitConfigs.StatorCurrentLimitEnable = true;
+    
+
+    leftLeaderConfigurator.apply(limitConfigs);
+    leftFollowerConfigurator.apply(limitConfigs);
+    rightLeaderConfigurator.apply(limitConfigs);
+    rightFollowerConfigurator.apply(limitConfigs);
+    
+    leftLeaderConfigurator.apply(leftConfiguration);
+    leftFollowerConfigurator.apply(leftConfiguration);
+    rightLeaderConfigurator.apply(rightConfiguration);
+    rightFollowerConfigurator.apply(rightConfiguration);
+
+    /* Set up followers to follow leaders */
+    leftFollower.setControl(new Follower(leftLeader.getDeviceID(), MotorAlignmentValue.Aligned));
+    rightFollower.setControl(new Follower(rightLeader.getDeviceID(), MotorAlignmentValue.Aligned));
   
-    // leftLeader.setSafetyEnabled(true);
-    // rightLeader.setSafetyEnabled(true);
+    leftLeader.setSafetyEnabled(true);
+    rightLeader.setSafetyEnabled(true);
 
-    // //create brushed motors for drive
-    leftLeader = new WPI_TalonSRX(1);
-    leftFollower = new WPI_TalonSRX(3);
+    // // //create brushed motors for drive
+    // leftLeader = new WPI_TalonSRX(1);
+    // leftFollower = new WPI_TalonSRX(3);
 
-    rightLeader = new WPI_TalonSRX(4);
-    rightFollower = new WPI_TalonSRX(2);
+    // rightLeader = new WPI_TalonSRX(4);
+    // rightFollower = new WPI_TalonSRX(2);
 
-    leftFollower.follow(leftLeader);
-    rightFollower.follow(rightLeader);
+    // leftFollower.follow(leftLeader);
+    // rightFollower.follow(rightLeader);
 
  
-    leftFollower.setInverted(true);
-    leftLeader.setInverted(true);
+    // leftFollower.setInverted(true);
+    // leftLeader.setInverted(true);
 
     //rightEncoder = new DutyCycleEncoder(RIGHT_ENCODER_ID);
     //leftEncoder = new DutyCycleEncoder(LEFT_ENCODER_ID);
@@ -259,6 +284,17 @@ public class DriveSubsystem extends SubsystemBase {
     return floorMod((angle1-angle2)+180, 360)-180;
   }
 
+    /**
+   * Returns the difference of two angles considering wrap.
+   * Subracts angle2 from angle1
+   * @param angle1 in rotations
+   * @param angle2 in rotations
+   * @return rotations value between -0.5 and +0.5
+   */
+  public static double angleSubtractRotations(double angle1, double angle2){
+    return floorMod((angle1-angle2)+0.5, 1)-0.5;
+  }
+
   /**
    * Returns the difference of two angles considering wrap.
    * Subracts angle2 from angle1
@@ -313,46 +349,27 @@ public class DriveSubsystem extends SubsystemBase {
   public Command turnToAngle(double angle){
     return run(
         () -> {
-      double dalekSpinnnnSpeeeed = 0.5;
-      double neededExterminateCalculator = (((gyroThePirate.getAngle()-(angle)) + 180) % 360) - 180;
-      drive.arcadeDrive(0, neededExterminateCalculator * dalekSpinnnnSpeeeed);
-     
+      double dalekSpinnnnSpeeeed = -0.005;
+      double neededExterminateCalculator = (((angleSubtractDegrees(gyroThePirate.getAngle(), angle)) + 180) % 360) - 180;
+      double re = neededExterminateCalculator * dalekSpinnnnSpeeeed;
+      drive.arcadeDrive(0, constrain(1, -1, (Math.abs(re)/re)*(0.23+Math.abs(re))));
     });
   }
 
+    /**
+   * 
+   * @param hi
+   * @param low
+   * @param input
+   * @return
+   */
+  public double constrain(double hi, double low, double input){
+      if(input > hi){
+          input = hi;
+      } else if(input < low){
+          input = low;
+      }
+      return input;
+  }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*  double heading = gyroThePirate.getCompassHeading() % 360;
-if (heading < 0) heading += 360; */

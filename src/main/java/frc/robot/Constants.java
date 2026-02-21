@@ -38,8 +38,8 @@ public final class Constants {
   public static final class FuelConstants {
     public static final int HOOD_ID = 2;
     public static final double INTAKING_HUNGRY_SPEED = 6.0;
-    public static final int HUNGRY_MOTOR_ID = 16;
-    public static final int Angle_HUNGRY_MOTOR_CURRENT_LIMIT = 60;
+    public static final int HUNGRY_MOTOR_ID = 6;
+    public static final int HUNGRY_MOTOR_CURRENT_LIMIT = 40;
     public static final int FEEDER_MOTOR_CURRENT_LIMIT = 40;
     // turrets pose
     public static final double centerOfRobotToTurret = 0.187;
@@ -53,15 +53,15 @@ public final class Constants {
 
 
     // Motor controller IDs for Fuel Mechanism motors
-    public static final int Feeder_MOTOR_ID = 5;
-    public static final int Angle_MOTOR_ID = 6;
+    public static final int Feeder_MOTOR_ID = 10;
+    public static final int Angle_MOTOR_ID = 3;
     public static final int Left_LAUNCHER_MOTOR_ID = 7;
     public static final int Right_LAUNCHER_MOTOR_ID = 8;
 
     // Current limit and nominal voltage for fuel mechanism motors.
     public static final int Angle_MOTOR_CURRENT_LIMIT = 20;
-    public static final int Left_MOTOR_CURRENT_LIMIT = 50;
-    public static final int Right_MOTOR_CURRENT_LIMIT = 50;
+    public static final int Left_MOTOR_CURRENT_LIMIT = 40;
+    public static final int Right_MOTOR_CURRENT_LIMIT = 40;
 
 
     // Voltage values for various fuel operations. These values may need to be tuned

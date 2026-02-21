@@ -22,26 +22,26 @@ public class Intake extends SubsystemBase {
         
    private final SparkMax hungrySparkMax;
 
-                public Intake() {
-   
+    public Intake() {
                   
-                  hungrySparkMax = new SparkMax(HUNGRY_MOTOR_ID, MotorType.kBrushless);
-                SparkMaxConfig hungryConfig = new SparkMaxConfig();
-                hungryConfig.smartCurrentLimit(Angle_HUNGRY_MOTOR_CURRENT_LIMIT);
+        hungrySparkMax = new SparkMax(HUNGRY_MOTOR_ID, MotorType.kBrushless);
+        SparkMaxConfig hungryConfig = new SparkMaxConfig();
+        hungryConfig.smartCurrentLimit(HUNGRY_MOTOR_CURRENT_LIMIT);
         hungrySparkMax.configure(hungryConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        SmartDashboard.putNumber("hungry Speed", INTAKING_HUNGRY_SPEED);
+ 
   }
 
   public Command setHungrySpeed(double speed) {
-    return run(
+    return runOnce(
         () -> {
         hungrySparkMax.set(speed);
-        });
+        System.out.println(speed);
+      });
   }
 
   public void stop() {
-
+    
   }
 
   @Override

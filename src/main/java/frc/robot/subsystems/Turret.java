@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.revrobotics.spark.SparkMax;
 
 
@@ -17,10 +18,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
 import static frc.robot.Constants.FuelConstants.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -34,6 +38,7 @@ public class Turret extends SubsystemBase {
   private final SparkMax angleOfTurretSparkMax;
   private final SparkMax leftFlyWheelSparkMax;
   private final SparkMax rightFlyWheelSparkMax;
+  private final DutyCycleEncoder turretEncoder;
   private Pose2d hub;
   private PIDController angleOfTurretPIDController;
   private PIDController flyWheelPidController;
@@ -41,7 +46,8 @@ public class Turret extends SubsystemBase {
   private char allianceColor;
   private char activeHub;
   private boolean isHubActive;
-  private boolean shouldItTrack;
+  private boolean shouldItTrack ;
+  private boolean manualOverRide = false;
   private boolean ifInZone;
 
   private Timer timer = new Timer();
@@ -64,6 +70,8 @@ public class Turret extends SubsystemBase {
 
     angleOfTurretPIDController = new PIDController(0.1, 0, 0);
     flyWheelPidController = new PIDController(0.1, 0, 0);
+
+    turretEncoder = new DutyCycleEncoder(3);
 
     hood = new ShooterHood();
     
@@ -96,11 +104,11 @@ public class Turret extends SubsystemBase {
     // all commands using this subsystem pull values from the dashbaord to allow
     // you to tune the values easily, and then replace the values in Constants.java
     // with your new values. For more information, see the Software Guide.
-    SmartDashboard.putNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE);
-    SmartDashboard.putNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE);
-    SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
-    SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
-    SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
+    // SmartDashboard.putNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE);
+    // SmartDashboard.putNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE);
+    // SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
+    // SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
+    // SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
   }
 
   @Override
@@ -248,13 +256,13 @@ public class Turret extends SubsystemBase {
 
   // A method to set the voltage of the intake roller
   /**
-   * should be in rotations
+   * should be in rotations for turret
    * 
    * @param angle
    */
   public void setAngle(double angle) {
 
-    angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(0.5, 0, angle)));
+    angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(1, -1, angle)));
   }
 
 
@@ -285,7 +293,7 @@ public class Turret extends SubsystemBase {
    * @param currentPose current robot pose
    */
   public void trackTarget(){
-    if(shouldItTrack){
+    if(shouldItTrack & !manualOverRide){
       trackPose2d(correctedRobotSpeed, target);
     }
     if (ifInZone & isHubActive){
@@ -382,6 +390,74 @@ public class Turret extends SubsystemBase {
           input = low;
       }
       return input;
+  }
+
+  public void resetAngleOfTurret(){
+    double offSet = 0.5;
+    angleOfTurretSparkMax.getEncoder().setPosition(angleSubtractRotations(turretEncoder.get(), offSet));
+  }
+
+  public Command spinTurretRight(){
+    return run(
+        () -> {
+      angleOfTurretSparkMax.set(0.1);
+    });
+    
+  }
+
+  public Command spinTurretLeft(){
+    return run(
+        () -> {
+      angleOfTurretSparkMax.set(-0.1);
+    });
+    
+  }
+
+  public Command resetTurretAngle(){
+    return run(
+        () -> {
+      resetAngleOfTurret();
+    });
+    
+  }
+
+  /**
+   * Returns the difference of two angles considering wrap.
+   * Subracts angle2 from angle1
+   * @param angle1 in rotations
+   * @param angle2 in rotations
+   * @return rotations value between -0.5 and +0.5
+   */
+  public static double angleSubtractRotations(double angle1, double angle2){
+    return floorMod((angle1-angle2)+0.5, 1)-0.5;
+  }
+
+    /**
+   * 
+   * @param x
+   * @param y
+   * @return
+   */
+  public static double floorMod(double x, double y) {
+    double result = (x - Math.floor(x / y) * y);
+    return result == y ? 0 : result;
+  }
+
+  public Command overRide(CommandXboxController xbox){
+    return run(
+        () -> {
+      manualOverRide = true;
+      xbox.povCenter().whileTrue(this.resetTurretAngle());
+
+      xbox.povLeft().whileTrue(this.spinTurretLeft());
+
+      xbox.povRight().whileTrue(this.spinTurretRight());
+    });
+    
+  }
+
+  public void stopOverRide(){
+    manualOverRide = false;    
   }
 
 }

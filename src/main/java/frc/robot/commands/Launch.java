@@ -23,6 +23,9 @@ public class Launch extends Command {
     addRequirements(fuelSystem);
     this.shooter = fuelSystem;
   }
+  public Launch() {
+
+  }
 
   // Called when the command is initially scheduled. Set the rollers to the
   // appropriate values for intaking

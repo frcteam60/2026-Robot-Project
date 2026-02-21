@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.FuelConstants.*;
 
@@ -41,5 +42,12 @@ public class Feeder extends SubsystemBase {
   // A method to set the voltage of the intake roller
   public void setFeedSpeed(double speed) {
     feederSparkMax.set(speed);
+  }
+
+  public Command setSpeedCommand(double speed) {
+    return runOnce(
+        () -> {
+        feederSparkMax.set(speed);
+      });
   }
 }
