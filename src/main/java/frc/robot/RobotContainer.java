@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import static frc.robot.Constants.OperatorConstants.*;
 import frc.robot.commands.Drive;
-import frc.robot.commands.Eject;
 import frc.robot.commands.ExampleAuto;
 import frc.robot.commands.IntakeBalls;
 import frc.robot.commands.LaunchSequence;
@@ -38,7 +37,7 @@ public class RobotContainer extends DriveSubsystem {
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final Turret shooter = new Turret();
   private final Intake HungryIntake = new Intake();
-  private final Feeder feeder = new Feeder();
+  private final Feeder chimney = new Feeder();
   //the steering mechanism
   private final Joystick steeringWheeeeel = new Joystick(STEERING_WHEEL_PORT);
   //the acceleration joystick
@@ -64,7 +63,7 @@ public class RobotContainer extends DriveSubsystem {
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
-    autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter));
+    autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter, chimney, HungryIntake));
   }
 
   /**
@@ -91,33 +90,37 @@ public class RobotContainer extends DriveSubsystem {
     // the intake
     //operatorController.a().whileTrue(new Eject(shooter));
 
+    operatorController.leftBumper().whileTrue(new IntakeBalls(HungryIntake, 0.5));
 
     
-    // operatorController.b().whileTrue(HungryIntake.setHungrySpeed(-0.85));
-    // operatorController.b().onFalse(HungryIntake.setHungrySpeed(0));
-    operatorController.b().whileTrue(new IntakeBalls(HungryIntake, -0.85));
+    operatorController.b().whileTrue(HungryIntake.setHungryRpm(-700));
+    operatorController.b().onFalse(HungryIntake.setHungrySpeed(0.0));
+    //operatorController.b().whileTrue(new IntakeBalls(HungryIntake, -0.85));
 
-    operatorController.leftTrigger().whileTrue(shooter.shoot(feeder, HungryIntake));
+    operatorController.leftTrigger().whileTrue(shooter.shoot(chimney, HungryIntake));
+    operatorController.leftTrigger().onFalse(HungryIntake.setHungrySpeed(0));
+    operatorController.leftTrigger().onFalse(chimney.setSpeedCommand(0));
 
-    operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeed(1));
+    operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
     operatorController.rightTrigger().onFalse(HungryIntake.setHungrySpeed(0));
 
 
-    operatorController.leftBumper().onTrue(feeder.setSpeedCommand(0.5));
-    operatorController.leftBumper().onFalse(feeder.setSpeedCommand(0));
+    operatorController.leftBumper().whileTrue(chimney.setSpeedCommand(-1));
+    operatorController.leftBumper().onFalse(chimney.setSpeedCommand(0));
     
     
 
-    operatorController.x().whileTrue(shooter.overRide(operatorController));
-    operatorController.x().onFalse(Commands.runOnce(shooter::stopOverRide));
+    operatorController.x().onTrue(Commands.runOnce(shooter::switchMode));
+    //operatorController.x().whileFalse(Commands.runOnce(shooter::switchToAuto));
 
+    operatorController.povCenter().onTrue(shooter.centerPOV());
+    operatorController.povCenter().onFalse(Commands.runOnce(shooter::stopTurret));
 
+    operatorController.povLeft().whileTrue(shooter.leftPOV());
+    operatorController.povLeft().onFalse(Commands.runOnce(shooter::stopTurret));
 
-    operatorController.a().whileTrue(shooter.joyStickServo(0.0));
-
-    operatorController.x().whileTrue(shooter.joyStickServo(0.7));
-
-    operatorController.y().whileTrue(shooter.joyStickServo(0.4));
+    operatorController.povRight().whileTrue(shooter.rightPOV());
+    operatorController.povRight().onFalse(Commands.runOnce(shooter::stopTurret));
 
 
 
@@ -130,6 +133,9 @@ public class RobotContainer extends DriveSubsystem {
 
     vroomVroomStick.povLeft().whileTrue(driveSubsystem.turnToAngle(270));
 
+
+    vroomVroomStick.button(0).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
+    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
     
     //driverController.rightBumper().onTrue(Commands.runOnce(driveSubsystem::shiftGears));
     
@@ -160,11 +166,14 @@ public class RobotContainer extends DriveSubsystem {
   }
 
   /**
-   * WILL BE CALLED IN teleopPeriodic in Robot
+   * MUST BE CALLED IN teleopPeriodic in Robot
    */
   public void teleopPeriodic(){
     //driveSubsystem.autoShiftGears();
     //shooter.trackTarget();
+    shooter.flyWheelSpin(operatorController.getRightY());
+    shooter.joyStickServo(operatorController.getRightX());
+    shooter.turretSpin(operatorController.getLeftX());
 
   }
 
@@ -174,9 +183,15 @@ public class RobotContainer extends DriveSubsystem {
   public void startTimer(){
     shooter.setUpTimer();
   }
-  public void autoMouseInnit(){
-    
 
+
+  public void autoMouseInnit(){
+    shooter.findAllianceColor();
+
+  }
+
+  public void teleopInit(){
+    shooter.findAllianceColor();
   }
 
   public void setTurretPos(){

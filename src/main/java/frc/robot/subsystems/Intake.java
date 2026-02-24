@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkMax;
 
 
 import edu.wpi.first.epilogue.Logged.Importance;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,29 +20,46 @@ import static frc.robot.Constants.FuelConstants.*;
 
 
 public class Intake extends SubsystemBase {
-        
    private final SparkMax hungrySparkMax;
+   private final PIDController intakController;
 
-    public Intake() {
-                  
-        hungrySparkMax = new SparkMax(HUNGRY_MOTOR_ID, MotorType.kBrushless);
-        SparkMaxConfig hungryConfig = new SparkMaxConfig();
-        hungryConfig.smartCurrentLimit(HUNGRY_MOTOR_CURRENT_LIMIT);
-        hungrySparkMax.configure(hungryConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  public Intake() {
+      intakController = new PIDController(0.2, 0, 0);
+      hungrySparkMax = new SparkMax(HUNGRY_MOTOR_ID, MotorType.kBrushless);
+      SparkMaxConfig hungryConfig = new SparkMaxConfig();
+      hungryConfig.smartCurrentLimit(HUNGRY_MOTOR_CURRENT_LIMIT);
+      hungrySparkMax.configure(hungryConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
- 
   }
 
+  /**
+   * 1 to -1
+   * 
+   * @param speed
+   * @return
+   */
   public Command setHungrySpeed(double speed) {
     return runOnce(
         () -> {
         hungrySparkMax.set(speed);
-        System.out.println(speed);
+      });
+  }
+
+  /**
+   * rpm
+   * 
+   * @param speed
+   * @return
+   */
+  public Command setHungryRpm(double speed) {
+    return run(
+        () -> {
+        hungrySparkMax.set(intakController.calculate(hungrySparkMax.getEncoder().getVelocity(), speed));
       });
   }
 
   public void stop() {
-    
+    hungrySparkMax.set(0); 
   }
 
   @Override

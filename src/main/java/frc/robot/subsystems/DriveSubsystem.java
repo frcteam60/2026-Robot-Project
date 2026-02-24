@@ -59,6 +59,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import edu.wpi.first.wpilibj.Encoder;
+
 //import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 
@@ -74,9 +76,9 @@ public class DriveSubsystem extends SubsystemBase {
   /** the robots speed if meters per sec */
   private Pose2d robotSpeed;
 
-  //private final Solenoid leftShifter;
-  //private final Solenoid rightShifter;
-
+  
+  //private final Solenoid Shifter;
+  
   private final TalonFX leftLeader;
   private final TalonFX leftFollower;
   private final TalonFX rightLeader;
@@ -89,16 +91,20 @@ public class DriveSubsystem extends SubsystemBase {
   private final PIDController pidController;
   private final DifferentialDrive drive;
   private final DifferentialDrivePoseEstimator poseEstimator;
-  //private final DutyCycleEncoder rightEncoder;
-  //private final DutyCycleEncoder leftEncoder;
-  private final PIDController partyIbuprophenDiameterController;
+  //private final Encoder leftEncoder;
+  Encoder rightEncoder;
+  
+  private static final double cpr = 360; //if am-3132
+  
+
+  private static final double whd = 6; // for 6 inch wheel
+
   /**
    * 
    */
   public DriveSubsystem() {
      
-    //leftShifter = new Solenoid(PneumaticsModuleType.REVPH, 0);
-    //rightShifter = new Solenoid(PneumaticsModuleType.REVPH, 1);
+    //Shifter = new Solenoid(PneumaticsModuleType.REVPH, 0);
 
     leftLeader = new TalonFX(1);
     leftFollower = new TalonFX(2);
@@ -156,13 +162,15 @@ public class DriveSubsystem extends SubsystemBase {
     // leftFollower.setInverted(true);
     // leftLeader.setInverted(true);
 
-    //rightEncoder = new DutyCycleEncoder(RIGHT_ENCODER_ID);
-    //leftEncoder = new DutyCycleEncoder(LEFT_ENCODER_ID);
+    //leftEncoder = new Encoder(2,1);
+    //leftEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
+    rightEncoder = new Encoder(3,4);
+    rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
 
     gyroThePirate = new AHRS(NavXComType.kMXP_SPI);
     
     pidController = new PIDController(0.75, 0, 0);
-    partyIbuprophenDiameterController = new PIDController(0.75, 0, 0);
+
     field = new Field2d();
         
     // set up differential drive class
@@ -170,8 +178,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     poseEstimator = new DifferentialDrivePoseEstimator(new DifferentialDriveKinematics(29),
                                                   new Rotation2d(Math.toRadians(gyroThePirate.getAngle())),
-                                                  (/*leftEncoder.get()*/0 * 18.8495559215) *39.3701, 
-                                                  (/*rightEncoder.get()*/0 * 18.8495559215) *39.3701, 
+                                                  /*leftEncoder.getDistance()*/0, 
+                                                  rightEncoder.getDistance(), 
                                                   new Pose2d(4, 0, new Rotation2d(0)));
     Supplier<Pose2d> poseSupplier = () -> poseEstimator.getEstimatedPosition();
     vision = new Vision(poseSupplier, field);
@@ -212,8 +220,8 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     poseEstimator.update(new Rotation2d(gyroThePirate.getAngle()),
-                         0, 
-                        0);
+                          /*leftEncoder.getDistance()*/0, 
+                          rightEncoder.getDistance());
                         
     vision.updatePoseEstimation(poseEstimator);
     count++;
@@ -226,6 +234,8 @@ public class DriveSubsystem extends SubsystemBase {
     
     SmartDashboard.putNumber("od Y", poseEstimator.getEstimatedPosition().getY());
     SmartDashboard.putNumber("od X", poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("angle of gyro", gyroThePirate.getAngle());
+    
   }
 
   public void driveArcade(double xSpeed, double zRotation) {
@@ -310,16 +320,28 @@ public class DriveSubsystem extends SubsystemBase {
     return poseEstimator.getEstimatedPosition();
   }
 
+  public double getRobotAngleGyro(){
+    return gyroThePirate.getAngle();
+  }
+
   public void autoShiftGears(){
     //double speed = Math.abs(Math.sqrt((robotSpeed.getX()*robotSpeed.getX()) + (robotSpeed.getY()*robotSpeed.getY())));
     // if(speed > 3.0){
-    //   leftShifter.set(true);
-    //   rightShifter.set(true);
+    //   Shifter.set(true);
+    //   
     // }
     // if(speed < 2.0){
-    //   leftShifter.set(false);
-    //   rightShifter.set(false);
+    //   Shifter.set(false);
+    //   
     // }
+  }
+
+  public void shiftToHigh(){
+    //Shifter.set(true);
+  }
+
+  public void shiftToLow(){
+    //Shifter.set(false);
   }
 
 

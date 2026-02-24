@@ -22,11 +22,9 @@ public final class Constants {
     // Motor controller IDs for drivetrain motors
     public static final int LEFT_LEADER_ID = 1;
     public static final int LEFT_FOLLOWER_ID = 2;
-    public static final int RIGHT_LEADER_ID = 3;
+    public static final int RIGHT_LEADER_ID = 5;
     public static final int RIGHT_FOLLOWER_ID = 4;
 
-    public static final int RIGHT_ENCODER_ID = 0;
-    public static final int LEFT_ENCODER_ID = 1;
 
 
 
@@ -36,7 +34,7 @@ public final class Constants {
   }
 
   public static final class FuelConstants {
-    public static final int HOOD_ID = 2;
+    public static final int HOOD_ID = 5;
     public static final double INTAKING_HUNGRY_SPEED = 6.0;
     public static final int HUNGRY_MOTOR_ID = 6;
     public static final int HUNGRY_MOTOR_CURRENT_LIMIT = 40;
