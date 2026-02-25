@@ -167,10 +167,10 @@ public class DriveSubsystem extends SubsystemBase {
     // leftLeader.setInverted(true);
 
     //leftEncoder = new Encoder(2,1);
-    //leftEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
+    leftEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
     //rightEncoder = new Encoder(6,7);
-    //rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
-    System.out.println("blathge");
+    rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
+    //System.out.println("blathge");
     gyroThePirate = new AHRS(NavXComType.kMXP_SPI);
     
     pidController = new PIDController(0.75, 0, 0);
@@ -182,8 +182,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     poseEstimator = new DifferentialDrivePoseEstimator(new DifferentialDriveKinematics(29),
                                                   new Rotation2d(Math.toRadians(gyroThePirate.getAngle())),
-                                                  /*leftEncoder.getDistance()*/0, 
-                                                  /*rightEncoder.getDistance()*/0, 
+                                                  leftEncoder.getDistance()/*0*/, 
+                                                  rightEncoder.getDistance()/*0*/, 
                                                   new Pose2d(4, 0, new Rotation2d(0)));
     Supplier<Pose2d> poseSupplier = () -> poseEstimator.getEstimatedPosition();
     vision = new Vision(poseSupplier, field);

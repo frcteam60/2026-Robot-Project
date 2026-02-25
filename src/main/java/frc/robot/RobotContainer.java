@@ -101,7 +101,8 @@ public class RobotContainer {
     operatorController.leftTrigger().onFalse(HungryIntake.setHungrySpeed(0));
     operatorController.leftTrigger().onFalse(chimney.setSpeedCommand(0));
 
-    operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
+    //operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
+     operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(4500));
     operatorController.rightTrigger().onFalse(HungryIntake.setHungrySpeed(0));
 
 
