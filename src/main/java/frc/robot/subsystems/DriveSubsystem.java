@@ -92,7 +92,11 @@ public class DriveSubsystem extends SubsystemBase {
   private final DifferentialDrive drive;
   private final DifferentialDrivePoseEstimator poseEstimator;
   //private final Encoder leftEncoder;
-  Encoder rightEncoder;
+  //Encoder rightEncoder;
+
+  private final Encoder leftEncoder = new Encoder(2,1);
+  private final Encoder rightEncoder = new Encoder(3,4);
+  
   
   private static final double cpr = 360; //if am-3132
   
@@ -164,9 +168,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     //leftEncoder = new Encoder(2,1);
     //leftEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
-    rightEncoder = new Encoder(3,4);
-    rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
-
+    //rightEncoder = new Encoder(6,7);
+    //rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
+    System.out.println("blathge");
     gyroThePirate = new AHRS(NavXComType.kMXP_SPI);
     
     pidController = new PIDController(0.75, 0, 0);
@@ -179,7 +183,7 @@ public class DriveSubsystem extends SubsystemBase {
     poseEstimator = new DifferentialDrivePoseEstimator(new DifferentialDriveKinematics(29),
                                                   new Rotation2d(Math.toRadians(gyroThePirate.getAngle())),
                                                   /*leftEncoder.getDistance()*/0, 
-                                                  rightEncoder.getDistance(), 
+                                                  /*rightEncoder.getDistance()*/0, 
                                                   new Pose2d(4, 0, new Rotation2d(0)));
     Supplier<Pose2d> poseSupplier = () -> poseEstimator.getEstimatedPosition();
     vision = new Vision(poseSupplier, field);
@@ -221,7 +225,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     poseEstimator.update(new Rotation2d(gyroThePirate.getAngle()),
                           /*leftEncoder.getDistance()*/0, 
-                          rightEncoder.getDistance());
+                          /*rightEncoder.getDistance()*/0);
                         
     vision.updatePoseEstimation(poseEstimator);
     count++;

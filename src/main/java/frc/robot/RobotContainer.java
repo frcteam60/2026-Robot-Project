@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
  * scheduler calls). Instead, the structure of the robot (including subsystems,
  * commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer extends DriveSubsystem {
+public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final Turret shooter = new Turret();
@@ -57,9 +57,9 @@ public class RobotContainer extends DriveSubsystem {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
-  public RobotContainer() {
+ 
+ public RobotContainer() {
     configureBindings();
-
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
@@ -134,8 +134,8 @@ public class RobotContainer extends DriveSubsystem {
     vroomVroomStick.povLeft().whileTrue(driveSubsystem.turnToAngle(270));
 
 
-    vroomVroomStick.button(0).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
-    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
+    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
+    vroomVroomStick.button(2).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
     
     //driverController.rightBumper().onTrue(Commands.runOnce(driveSubsystem::shiftGears));
     
