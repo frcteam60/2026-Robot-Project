@@ -90,7 +90,7 @@ public class RobotContainer {
     // the intake
     //operatorController.a().whileTrue(new Eject(shooter));
 
-    operatorController.leftBumper().whileTrue(new IntakeBalls(HungryIntake, 0.5));
+    //operatorController.leftBumper().whileTrue(new IntakeBalls(HungryIntake, 0.5));
 
     
     operatorController.b().whileTrue(HungryIntake.setHungryRpm(-700));
