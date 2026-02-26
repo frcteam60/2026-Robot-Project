@@ -48,7 +48,7 @@ public class Turret extends SubsystemBase {
   private char activeHub;
   private boolean isHubActive;
   private boolean shouldItTrack;
-  private boolean ifInManual = false;
+  private boolean ifInManual;
   /** in rotations of the motor */
   private double desiredAngleOfTurret;
   private boolean ifInZone;
@@ -66,7 +66,8 @@ public class Turret extends SubsystemBase {
 
   /** Creates a new CANBallSubsystem. */
   public Turret() {
-    System.out.println("sdfgTurres");
+    ifInManual = false;
+    //System.out.println("sdfgTurres");
     robotPose = new Pose2d();
     positionOfT = 0;
     // create brushed motors for each of the motors on the launcher mechanism
@@ -283,6 +284,7 @@ public class Turret extends SubsystemBase {
   public void setAngle(double rotations) {
 
     angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(193.75, -193.75, rotations)));
+    //angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(-11.78, -12.17, rotations)));
   }
 
 
@@ -444,8 +446,12 @@ public class Turret extends SubsystemBase {
 
   public void resetAngleOfTurret(){
     double offSet = 0;
-    SmartDashboard.putNumber("angle of turret is being set to", 25.0*angleSubtractRotations(turretEncoder.get(), offSet));
-    angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), offSet));
+    double resetAngle = 25.0*angleSubtractRotations(turretEncoder.get(), offSet);
+    //SmartDashboard.putNumber("angle of turret is being set to", 25.0*angleSubtractRotations(turretEncoder.get(), offSet));
+    //angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), offSet));
+    //System.out.println("Turret angle reset to: " + resetAngle);
+    SmartDashboard.putNumber("resetAngle", resetAngle);
+    angleOfTurretSparkMax.getEncoder().setPosition(resetAngle);
   }
 
 

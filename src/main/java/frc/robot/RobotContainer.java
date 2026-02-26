@@ -102,7 +102,7 @@ public class RobotContainer {
     operatorController.leftTrigger().onFalse(chimney.setSpeedCommand(0));
 
     //operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
-     operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(4500));
+     operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(5000));
     operatorController.rightTrigger().onFalse(HungryIntake.setHungrySpeed(0));
 
 
@@ -114,7 +114,7 @@ public class RobotContainer {
     operatorController.x().onTrue(Commands.runOnce(shooter::switchMode));
     //operatorController.x().whileFalse(Commands.runOnce(shooter::switchToAuto));
 
-    operatorController.povCenter().onTrue(shooter.centerPOV());
+    operatorController.start().onTrue(shooter.centerPOV());
     operatorController.povCenter().onFalse(Commands.runOnce(shooter::stopTurret));
 
     operatorController.povLeft().whileTrue(shooter.leftPOV());
@@ -173,7 +173,8 @@ public class RobotContainer {
     //driveSubsystem.autoShiftGears();
     //shooter.trackTarget();
     shooter.flyWheelSpin(operatorController.getRightY());
-    shooter.joyStickServo(operatorController.getRightX());
+    // the hood is not working
+    //shooter.joyStickServo(operatorController.getRightX());
     shooter.turretSpin(operatorController.getLeftX());
 
   }

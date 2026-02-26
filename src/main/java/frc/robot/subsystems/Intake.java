@@ -24,7 +24,8 @@ public class Intake extends SubsystemBase {
    private final PIDController intakController;
 
   public Intake() {
-      intakController = new PIDController(0.0002, 0, 0);
+      intakController = new PIDController(0.0003, 0, 0.00003);
+      //intakController = new PIDController(0, 0, 0);
       hungrySparkMax = new SparkMax(HUNGRY_MOTOR_ID, MotorType.kBrushless);
       SparkMaxConfig hungryConfig = new SparkMaxConfig();
       hungryConfig.smartCurrentLimit(HUNGRY_MOTOR_CURRENT_LIMIT);
