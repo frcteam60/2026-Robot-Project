@@ -34,10 +34,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
  * commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final Turret shooter = new Turret();
   private final Intake HungryIntake = new Intake();
+  private final Feeder chimney = new Feeder();
   private final Feeder chimney = new Feeder();
   //the steering mechanism
   private final Joystick steeringWheeeeel = new Joystick(STEERING_WHEEL_PORT);
@@ -60,10 +62,13 @@ public class RobotContainer {
    */
  
  public RobotContainer() {
+ 
+ public RobotContainer() {
     configureBindings();
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
+    autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter, chimney, HungryIntake));
     autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter, chimney, HungryIntake));
   }
 
@@ -161,6 +166,9 @@ public class RobotContainer {
 
     vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
     vroomVroomStick.button(2).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
+
+    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
+    vroomVroomStick.button(2).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
     
     //driverController.rightBumper().onTrue(Commands.runOnce(driveSubsystem::shiftGears));
     
@@ -192,6 +200,7 @@ public class RobotContainer {
 
   /**
    * MUST BE CALLED IN teleopPeriodic in Robot
+   * MUST BE CALLED IN teleopPeriodic in Robot
    */
   public void teleopPeriodic(){
     //driveSubsystem.autoShiftGears();
@@ -210,7 +219,12 @@ public class RobotContainer {
   }
 
 
+
+
   public void autoMouseInnit(){
+    shooter.findAllianceColor();
+
+  }
     shooter.findAllianceColor();
 
   }

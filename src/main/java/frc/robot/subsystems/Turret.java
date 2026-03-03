@@ -137,6 +137,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("hood angle real", hood.getLastAngle());
     // This method will be called once per scheduler run
     
+    
 
     if (allianceColor == 'B'){
       //if in alliance zone
@@ -313,6 +314,8 @@ public class Turret extends SubsystemBase {
     //angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(193.75, -193.75, rotations)));
     angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(85, -85, rotations)));
   }
+
+
 
 
 
@@ -587,5 +590,4 @@ public class Turret extends SubsystemBase {
   public void fixAutoJerk(){
     desiredAngleOfTurret = angleOfTurretSparkMax.getEncoder().getPosition();
   }
-
 }

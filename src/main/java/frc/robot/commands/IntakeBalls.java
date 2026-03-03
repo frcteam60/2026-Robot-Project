@@ -22,8 +22,10 @@ public class IntakeBalls extends Command {
 
 
   public IntakeBalls(Intake intakeSystem, double firstInputSpeed) {
+  public IntakeBalls(Intake intakeSystem, double firstInputSpeed) {
     addRequirements(intakeSystem);
     this.intake = intakeSystem;
+    this.speed = firstInputSpeed;
     this.speed = firstInputSpeed;
   }
 
@@ -38,6 +40,7 @@ public class IntakeBalls extends Command {
   // command doesn't require updating any values while running
   @Override
   public void execute() {
+    
     
   }
 

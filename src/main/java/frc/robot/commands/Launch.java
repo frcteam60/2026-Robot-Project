@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Turret;
 
 import static frc.robot.Constants.FuelConstants.*;
@@ -19,6 +20,8 @@ public class Launch extends Command {
   Turret shooter;
   Feeder turretFeed;
   Intake intake;
+
+
 
   public Launch(Turret fuelSystem, Feeder feeder, Intake intake) {
     addRequirements(fuelSystem);
@@ -34,6 +37,7 @@ public class Launch extends Command {
   // appropriate values for intaking
   @Override
   public void initialize() {
+    
     
   }
 
