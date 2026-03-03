@@ -34,12 +34,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
  * commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final Turret shooter = new Turret();
   private final Intake HungryIntake = new Intake();
-  private final Feeder chimney = new Feeder();
   private final Feeder chimney = new Feeder();
   //the steering mechanism
   private final Joystick steeringWheeeeel = new Joystick(STEERING_WHEEL_PORT);
@@ -61,7 +59,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
  
- public RobotContainer() {
  
  public RobotContainer() {
     configureBindings();
@@ -223,11 +220,12 @@ public class RobotContainer {
 
   public void autoMouseInnit(){
     shooter.findAllianceColor();
-
-  }
     shooter.findAllianceColor();
 
   }
+    
+
+  
 
   public void teleopInit(){
     shooter.findAllianceColor();

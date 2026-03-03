@@ -22,7 +22,6 @@ public class IntakeBalls extends Command {
 
 
   public IntakeBalls(Intake intakeSystem, double firstInputSpeed) {
-  public IntakeBalls(Intake intakeSystem, double firstInputSpeed) {
     addRequirements(intakeSystem);
     this.intake = intakeSystem;
     this.speed = firstInputSpeed;
