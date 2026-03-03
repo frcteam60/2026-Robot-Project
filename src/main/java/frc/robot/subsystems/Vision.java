@@ -122,9 +122,9 @@ public class Vision
   }
 
   /**
-   * Update the pose estimation inside of {@link SwerveDrive} with all of the given poses.
+   * Update the pose estimation 
    *
-   * @param swerveDrive {@link SwerveDrive} instance.
+   * @param swerveDrive poseEstimator instance.
    */
   public void updatePoseEstimation(DifferentialDrivePoseEstimator poseEstimator)
   {
@@ -336,33 +336,33 @@ public class Vision
    */
   enum Cameras
   {
-    // /**
-    //  * Left Camera
-    //  */
-    // LEFT_CAM("left",
-    //          new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(30)),
-    //          new Translation3d(Units.inchesToMeters(12.056),
-    //                            Units.inchesToMeters(10.981),
-    //                            Units.inchesToMeters(8.44)),
-    //          VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
-    // /**
-    //  * Right Camera
-    //  */
-    // RIGHT_CAM("right",
-    //           new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(-30)),
-    //           new Translation3d(Units.inchesToMeters(12.056),
-    //                             Units.inchesToMeters(-10.981),
-    //                             Units.inchesToMeters(8.44)),
-    //           VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
     /**
-     * Center Camera
+     * Back Left Camera
      */
-    CENTER_CAM("Color_Arducam_OV9782_USB_Camera",
-               new Rotation3d(0, Units.degreesToRadians(25), 0),
-               new Translation3d(Units.inchesToMeters(-4.628),
-                                 Units.inchesToMeters(-10.687),
-                                 Units.inchesToMeters(16.129)),
-               VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
+    BACK_LEFT_CAM("backLeft",
+              new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(135)),
+              new Translation3d(Units.inchesToMeters(-11.3695),
+                                Units.inchesToMeters(-11.376),
+                                Units.inchesToMeters(8.75)),
+              VecBuilder.fill(2, 2, 3), VecBuilder.fill(0.5, 0.5, 0.8)),
+    /**
+     * Right Camera
+     */
+    FRONT_RIGHT_CAM("frontRight",
+               new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(-15)),
+               new Translation3d(Units.inchesToMeters(11.3695),
+                                 Units.inchesToMeters(-11.376),
+                                 Units.inchesToMeters(8.75)),
+               VecBuilder.fill(2, 2, 3), VecBuilder.fill(0.5, 0.5, 1)),
+     /**          
+     * Front Left Camera
+     */
+    FRONT_LEFT_CAM("frontLeft",
+               new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(15)),
+               new Translation3d(Units.inchesToMeters(11.3695),
+                                 Units.inchesToMeters(11.376),
+                                 Units.inchesToMeters(8.75)),
+               VecBuilder.fill(2, 2, 3), VecBuilder.fill(0.5, 0.5, 1));
 
     /**
      * Latency alert to use when high latency is detected.

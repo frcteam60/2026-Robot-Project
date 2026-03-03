@@ -21,30 +21,30 @@ public class IntakeBalls extends Command {
 
 
 
-  public IntakeBalls(Intake intakeSystem, double speed) {
+  public IntakeBalls(Intake intakeSystem, double firstInputSpeed) {
     addRequirements(intakeSystem);
     this.intake = intakeSystem;
-    this.speed = speed;
+    this.speed = firstInputSpeed;
   }
 
   // Called when the command is initially scheduled. Set the rollers to the
   // appropriate values for intaking
   @Override
   public void initialize() {
-    intake.setHungrySpeed(speed);
-
+    intake.setHungrySpeedCommand(speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled. This
   // command doesn't require updating any values while running
   @Override
   public void execute() {
+    
   }
 
   // Called once the command ends or is interrupted. Stop the rollers
   @Override
   public void end(boolean interrupted) {
-    intake.setHungrySpeed(0);
+    intake.setHungrySpeedCommand(0);
   }
 
   // Returns true when the command should end.
