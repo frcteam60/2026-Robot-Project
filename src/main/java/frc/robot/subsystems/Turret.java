@@ -35,6 +35,8 @@ import java.util.Optional;
 
 import javax.lang.model.util.ElementScanner14;
 
+import org.opencv.core.Mat;
+
 
 public class Turret extends SubsystemBase {
   private final SparkMax angleOfTurretSparkMax;
@@ -50,10 +52,9 @@ public class Turret extends SubsystemBase {
   private boolean isHubActive;
   private boolean shouldItTrack;
   private boolean ifInManual = false;
-  /** in rotations of the motor */
+  /** desired anlge of turret relative to the robot in rotations of the motor */
   private double desiredAngleOfTurret;
   private boolean ifInZone;
-  private double positionOfT;
 
   private Timer timer = new Timer();
 
@@ -63,25 +64,26 @@ public class Turret extends SubsystemBase {
   private Pose2d correctedRobotSpeed;
 
   /**What the robot should shoot at. like the hub and passing spots*/
-  private Pose2d target = new Pose2d(
+  private Pose2d target = new Pose2d();
 
-  );
-
+  private int smartdashboardCount = 0;
   /** Creates a new CANBallSubsystem. */
   public Turret() {
     
     //System.out.println("sdfgTurres");
     robotPose = new Pose2d();
-    positionOfT = 0;
+
+    desiredAngleOfTurret = 0;
     // create brushed motors for each of the motors on the launcher mechanism
     leftFlyWheelSparkMax = new SparkMax(Left_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     rightFlyWheelSparkMax = new SparkMax(Right_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     angleOfTurretSparkMax = new SparkMax(Angle_MOTOR_ID, MotorType.kBrushless);
 
-    angleOfTurretPIDController = new PIDController(0.1, 0, 0);
-    flyWheelPidController = new PIDController(0.0005, 0, 0.006);
+    angleOfTurretPIDController = new PIDController(0.07, 0, 0);
+    flyWheelPidController = new PIDController(0.0001, 0.0, 0.0);
 
     turretEncoder = new DutyCycleEncoder(0);
+    turretEncoder.setInverted(true);
 
     hood = new ShooterHood();
     
@@ -90,7 +92,10 @@ public class Turret extends SubsystemBase {
     // the config to the controller
     SparkMaxConfig angleConfig = new SparkMaxConfig();
     angleConfig.smartCurrentLimit(Angle_MOTOR_CURRENT_LIMIT);
+    angleConfig.inverted(true);
     angleOfTurretSparkMax.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    angleOfTurretSparkMax.getEncoder().setPosition(0);
     
 
     // create the configuration for the launcher roller, set a current limit, set
@@ -123,22 +128,29 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-    setAngle(desiredAngleOfTurret);
-    //SmartDashboard.putNumber("abs turret motor rotations", angleOfTurretSparkMax.getAbsoluteEncoder().getPosition());
-    //SmartDashboard.putNumber("rel turret motor rotations", angleOfTurretSparkMax.getEncoder().getPosition());
-    //SmartDashboard.putNumber("abs turret encoder rotations", turretEncoder.get());
-    SmartDashboard.putBoolean("if in manual mode", ifInManual);
-    //SmartDashboard.putBoolean("if in try tracking", shouldItTrack);
-    SmartDashboard.putNumber("shooter speed in rpms", angleOfTurretSparkMax.getEncoder().getVelocity());
-
-    SmartDashboard.putNumber("robot angle", robotPose.getRotation().getDegrees());
-
-    //SmartDashboard.putNumber("angle of turret neo 550", angleOfTurretSparkMax.getEncoder().getPosition());
-    SmartDashboard.putNumber("hood angle real", hood.getLastAngle());
     // This method will be called once per scheduler run
-    
-    
+    setAngle(desiredAngleOfTurret);
+    smartdashboardCount++;
+    if(smartdashboardCount == 4){
+      smartdashboardCount = 0;
+      //SmartDashboard.putNumber("abs turret motor rotations", angleOfTurretSparkMax.getAbsoluteEncoder().getPosition());
+      SmartDashboard.putNumber("rel turret motor rotations", angleOfTurretSparkMax.getEncoder().getPosition());
+      //SmartDashboard.putNumber("abs turret encoder rotations", turretEncoder.get());
+      SmartDashboard.putBoolean("if in manual mode", ifInManual);
+      //SmartDashboard.putBoolean("if in try tracking", shouldItTrack);
+      SmartDashboard.putNumber("shooter speed in rpms", rightFlyWheelSparkMax.getEncoder().getVelocity());
+      SmartDashboard.putNumber("dis wheels speed shoot", -getFlywheelSpeed(getDistanceBetween(correctedRobotSpeed, target)));
+      SmartDashboard.putNumber("pid", flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), 1000));
 
+      SmartDashboard.putNumber("robot angle", robotPose.getRotation().getDegrees());
+
+      //SmartDashboard.putNumber("angle of turret neo 550", angleOfTurretSparkMax.getEncoder().getPosition());
+      SmartDashboard.putNumber("hood angle real", hood.getLastAngle());
+      //SmartDashboard.putNumber("seting turret", 25.0*angleSubtractRotations(turretEncoder.get(), 0.8));
+      
+    }
+    
+    
     if (allianceColor == 'B'){
       //if in alliance zone
       if(robotPose.getX() < 4.5){
@@ -181,8 +193,8 @@ public class Turret extends SubsystemBase {
     }
     
     correctedRobotSpeed = new Pose2d(
-                                    robotPose.getX() + SmartDashboard.getNumber("X speed", LAUNCHING_LAUNCHER_VOLTAGE),
-                                    robotPose.getY() + SmartDashboard.getNumber("Y speed", LAUNCHING_LAUNCHER_VOLTAGE),
+                                    robotPose.getX() + SmartDashboard.getNumber("X speed", 0),
+                                    robotPose.getY() + SmartDashboard.getNumber("Y speed", 0),
                                     robotPose.getRotation());
 
     // code for finding if hub is active 
@@ -282,7 +294,10 @@ public class Turret extends SubsystemBase {
    * @return returns the shooter real speed rpms
    */
   public double setFlyWheelSpeed(double speed) {
-    rightFlyWheelSparkMax.set((speed/4000)+flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed));
+    
+    rightFlyWheelSparkMax.set((speed/5350)+(flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed)));
+    //rightFlyWheelSparkMax.set((speed/5350));
+    //rightFlyWheelSparkMax.set(flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed));
     return rightFlyWheelSparkMax.getEncoder().getVelocity();
   }
 
@@ -317,7 +332,18 @@ public class Turret extends SubsystemBase {
 
 
 
-
+  /**
+   * should be in rotations for turret 85 is the max and -85 the min
+   * 
+   * @param angle
+   * @return
+   */
+  public Command setDesiredTurretAngleCommand(double angle) {
+    return run(
+        () -> {
+        desiredAngleOfTurret = angle;
+      });
+  }
 
 
   /**
@@ -337,12 +363,25 @@ public class Turret extends SubsystemBase {
       //     intake.setHungrySpeedCommand(0.1);
       //   }
       // }
-      
-      double desiredSpeed = getFlywheelSpeed(getDistanceBetween(correctedRobotSpeed, target));
+      double desiredSpeed = getFlywheelSpeed(Math.abs(getDistanceBetween(correctedRobotSpeed, target)));
 
       double realSpeed = setFlyWheelSpeed(-desiredSpeed);
-      SmartDashboard.putNumber("real wheels speed shoot", realSpeed);
-      SmartDashboard.putNumber("dis wheels speed shoot", -desiredSpeed);
+      //SmartDashboard.putNumber("dis wheels speed shoot", -desiredSpeed);
+      // feeder.setFeedSpeed(-1);
+      // intake.setHungrySpeed(0.3);
+    });
+  
+  }
+
+   /**
+   * feeds and agitates the balls with the intake
+   * 
+   * @param feeder feeder
+   * @param intake intake
+   */
+  public Command feed(Feeder feeder, Intake intake){
+    return run(
+        () -> {
       feeder.setFeedSpeed(-1);
       intake.setHungrySpeed(0.3);
     });
@@ -379,17 +418,24 @@ public class Turret extends SubsystemBase {
     // if(shouldItTrack & !ifInManual){
     //   trackPose2d(correctedRobotSpeed, target);
     // }
-    trackPose2d(correctedRobotSpeed, target);
 
-    if (ifInZone & isHubActive  & !ifInManual){
-        if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target))-hood.getLastAngle()) > 5){
-          //hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
-        }
-    } else{
-      if(!ifInManual){
-        hood.setAngle(80);
-      }
+    if(ifInManual){
+      trackPose2d(correctedRobotSpeed, target);
     }
+    
+
+    // if (ifInZone & isHubActive & !ifInManual){
+    //     if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target))-hood.getLastAngle()) > 5){
+    //       hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+    //     }
+    // } else{
+    //   if(!ifInManual){
+    //     hood.setAngle(80);
+    //   }
+    // }
+    // if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target))-hood.getLastAngle()) > 5){
+    //        hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+    // }
 
   }
 
@@ -406,7 +452,8 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("what tell angle turret to be auto track", ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2));
     //desiredAngleOfTurret = ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2);
     SmartDashboard.putNumber("what tell angle turret to be auto track simply",((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2));
-    desiredAngleOfTurret = robotPose.getRotation().getDegrees();
+
+    desiredAngleOfTurret = -(angleSubtractRotations(robotPose.getRotation().getRotations(), 0)*250);
 
   }
 
@@ -425,8 +472,8 @@ public class Turret extends SubsystemBase {
    * @param dis distance in meters from the target
    * @return return in degrees
    */
-  public double getHoodAngle(double dis){
-    return 89.9*Math.log(-0.111*dis);
+  public static double getHoodAngle(double dis){
+    return Math.abs(89.9*Math.log(Math.abs(-0.111*dis)));
   }
 
   // A method to stop the rollers
@@ -451,7 +498,6 @@ public class Turret extends SubsystemBase {
   public void joyStickServo(double dis){
     //if(ifInManual){  
       hood.setAngle((dis*2)+hood.getLastAngle());
-      SmartDashboard.putNumber("hood angle",(dis*2)+hood.getLastAngle() );
     //}
   } 
 
@@ -495,9 +541,8 @@ public class Turret extends SubsystemBase {
   }
 
   public void resetAngleOfTurret(){
-    double offSet = 0;
-    SmartDashboard.putNumber("angle of turret is being set to", 25.0*angleSubtractRotations(turretEncoder.get(), offSet));
-    angleOfTurretSparkMax.getEncoder().setPosition(0);
+    double offSet = 0.8;
+    angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), offSet));
     //angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), offSet));
   }
 
@@ -528,12 +573,12 @@ public class Turret extends SubsystemBase {
     
   }
 
-  public Command centerPOV(){
-    return run(
+  public Command UpPOV(){
+    return runOnce(
         () -> {
-      //if(ifInManual){
+      if(ifInManual){
         resetAngleOfTurret();
-      //}   
+      }   
       
     });
     
@@ -565,14 +610,14 @@ public class Turret extends SubsystemBase {
   }
 
   public void turretSpin(double xboxPos){
-    //if(ifInManual){
+    if(ifInManual){
       desiredAngleOfTurret = angleOfTurretSparkMax.getEncoder().getPosition() + (4*xboxPos);
-    //}
+    }
   }
   public void flyWheelSpin(double xboxPos){
-    //if(ifInManual){
+    if(ifInManual){
       rightFlyWheelSparkMax.set(xboxPos);
-    //}
+    }
   }
 
 

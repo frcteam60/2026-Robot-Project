@@ -100,33 +100,39 @@ public class RobotContainer {
     //operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0.0));
     //operatorController.b().whileTrue(new IntakeBalls(HungryIntake, -0.85));
 
-    operatorController.leftTrigger().whileTrue(shooter.shoot(chimney, HungryIntake));
+    operatorController.leftTrigger().whileTrue(shooter.feed(chimney, HungryIntake));
     // operatorController.leftTrigger().whileTrue(chimney.setSpeedCommand(-1));
     // operatorController.leftTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(.25));
     operatorController.leftTrigger().onFalse(HungryIntake.setHungrySpeedCommand(0));
     operatorController.leftTrigger().onFalse(chimney.setSpeedCommand(0));
 
+    operatorController.rightBumper().whileTrue(shooter.shoot(chimney, HungryIntake));
+    operatorController.rightBumper().onFalse(shooter.setFlyWheelSpeedCommand(0));
+
     //operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
-     operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(1));
+     operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(0.8));
     operatorController.rightTrigger().onFalse(HungryIntake.setHungrySpeedCommand(0));
 
 
-    operatorController.a().whileTrue(shooter.setFlyWheelSpeedCommand(0.5));
-    operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
-
-    operatorController.b().whileTrue(shooter.setFlyWheelSpeedCommand(0.7));
-    operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
-
-    // operatorController.a().whileTrue(shooter.setFlyWheelSpeedCommandRpm(800));
+    // operatorController.a().onTrue(shooter.setFlyWheelSpeedCommand(-0.5));
     // operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    // operatorController.b().whileTrue(shooter.setFlyWheelSpeedCommandRpm(1800));
+    // operatorController.b().onTrue(shooter.setFlyWheelSpeedCommand(-0.7));
     // operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    // operatorController.y().whileTrue(shooter.setFlyWheelSpeedCommandRpm(3500));
-    // operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    operatorController.a().whileTrue(shooter.setFlyWheelSpeedCommandRpm(800));
+    operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
+
+    operatorController.b().whileTrue(shooter.setFlyWheelSpeedCommandRpm(1800));
+    operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
+
+    operatorController.y().whileTrue(shooter.setFlyWheelSpeedCommandRpm(3500));
+    operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
 
+    // operatorController.a().onTrue(shooter.setDesiredTurretAngleCommand(85));
+    //operatorController.b().onTrue(shooter.setDesiredTurretAngleCommand(0));
+    //operatorController.y().onTrue(shooter.setDesiredTurretAngleCommand(-85));
 
 
     //operatorController.leftBumper().whileTrue(chimney.setSpeedCommand(-1));
@@ -137,8 +143,6 @@ public class RobotContainer {
     operatorController.x().onTrue(Commands.runOnce(shooter::switchMode));
     //operatorController.x().whileFalse(Commands.runOnce(shooter::switchToAuto));
 
-    operatorController.start().onTrue(shooter.centerPOV());
-    operatorController.start().onFalse(Commands.runOnce(shooter::stopTurret));
 
     operatorController.povLeft().whileTrue(shooter.leftPOV());
     operatorController.povLeft().onFalse(Commands.runOnce(shooter::stopTurret));
@@ -146,8 +150,8 @@ public class RobotContainer {
     operatorController.povRight().whileTrue(shooter.rightPOV());
     operatorController.povRight().onFalse(Commands.runOnce(shooter::stopTurret));
 
-    operatorController.povCenter().whileTrue(shooter.centerPOV());
-    operatorController.povCenter().onFalse(Commands.runOnce(shooter::stopTurret));
+    operatorController.povUp().onTrue(shooter.UpPOV());
+    operatorController.povUp().onFalse(Commands.runOnce(shooter::stopTurret));
 
 
 
@@ -162,10 +166,7 @@ public class RobotContainer {
 
 
     vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
-    vroomVroomStick.button(2).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
-
-    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
-    vroomVroomStick.button(2).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
+    vroomVroomStick.button(1).onFalse(Commands.runOnce(driveSubsystem::shiftToLow));
     
     //driverController.rightBumper().onTrue(Commands.runOnce(driveSubsystem::shiftGears));
     
@@ -202,9 +203,9 @@ public class RobotContainer {
   public void teleopPeriodic(){
     //driveSubsystem.autoShiftGears();
     //shooter.trackTarget();
-    shooter.flyWheelSpin(MathUtil.applyDeadband(operatorController.getRightY(), 0.05));
+    shooter.flyWheelSpin(-MathUtil.applyDeadband(operatorController.getRightY(), 0.05));
     shooter.joyStickServo(MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));
-    shooter.turretSpin(MathUtil.applyDeadband(operatorController.getRightX(), 0.05));
+    shooter.turretSpin(-MathUtil.applyDeadband(operatorController.getRightX(), 0.05));
 
   }
 
@@ -219,6 +220,7 @@ public class RobotContainer {
 
 
   public void autoMouseInnit(){
+    shooter.resetAngleOfTurret();
     shooter.findAllianceColor();
     shooter.findAllianceColor();
 
@@ -226,14 +228,14 @@ public class RobotContainer {
     
 
   
-
   public void teleopInit(){
     shooter.findAllianceColor();
-    shooter.fixAutoJerk();
+    //shooter.fixAutoJerk();
   }
 
-  public void setTurretPos(){
-    //shooter.resetAngleOfTurret();
+  public void robotInit(){
+    shooter.resetAngleOfTurret();
+    //shooter.fixAutoJerk();
   }  
   
 }

@@ -92,7 +92,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final DifferentialDrive drive;
   private final DifferentialDrivePoseEstimator poseEstimator;
   //private final Encoder leftEncoder;
-  //Encoder rightEncoder;
+  //private final Encoder rightEncoder;
 
   private final Encoder leftEncoder = new Encoder(2,1);
   private final Encoder rightEncoder = new Encoder(3,4);
@@ -168,10 +168,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     //leftEncoder = new Encoder(2,1);
     leftEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
-    //rightEncoder = new Encoder(6,7);
+    //rightEncoder = new Encoder(3,4);
     rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
-    //System.out.println("blathge");
+    
     gyroThePirate = new AHRS(NavXComType.kMXP_SPI);
+    
     
     pidController = new PIDController(0.75, 0, 0);
 
@@ -181,7 +182,7 @@ public class DriveSubsystem extends SubsystemBase {
     drive = new DifferentialDrive(leftLeader::set, rightLeader::set);
 
     poseEstimator = new DifferentialDrivePoseEstimator(new DifferentialDriveKinematics(29),
-                                                  new Rotation2d(Math.toRadians(gyroThePirate.getAngle())),
+                                                  new Rotation2d(Math.toRadians(-gyroThePirate.getAngle())),
                                                   leftEncoder.getDistance()/*0*/, 
                                                   rightEncoder.getDistance()/*0*/, 
                                                   new Pose2d(4, 0, new Rotation2d(0)));
@@ -223,7 +224,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    poseEstimator.update(new Rotation2d(gyroThePirate.getAngle()),
+    poseEstimator.update(new Rotation2d(-gyroThePirate.getAngle()),
                           /*leftEncoder.getDistance()*/0, 
                           /*rightEncoder.getDistance()*/0);
                         
@@ -238,7 +239,7 @@ public class DriveSubsystem extends SubsystemBase {
     
     SmartDashboard.putNumber("od Y", poseEstimator.getEstimatedPosition().getY());
     SmartDashboard.putNumber("od X", poseEstimator.getEstimatedPosition().getX());
-    SmartDashboard.putNumber("angle of gyro", gyroThePirate.getAngle());
+    SmartDashboard.putNumber("angle of gyro", -gyroThePirate.getAngle());
     
   }
 
@@ -264,7 +265,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void fieldCentricDrive(double xSpeed, double ySpeed, double xRotation, double yRotation){
     double rotation = 0;
-    double currentAngle = Math.toRadians(gyroThePirate.getAngle());
+    double currentAngle = Math.toRadians(-gyroThePirate.getAngle());
     double error = angleSubtractRadians(Math.atan2(ySpeed, xSpeed), currentAngle);
     double robotSpeed = Math.sqrt((xSpeed*xSpeed) +(ySpeed*ySpeed)) * Math.cos(error);
     if(Math.abs(error) > Math.PI/2){
@@ -325,7 +326,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getRobotAngleGyro(){
-    return gyroThePirate.getAngle();
+    return -gyroThePirate.getAngle();
   }
 
   public void autoShiftGears(){
@@ -376,7 +377,7 @@ public class DriveSubsystem extends SubsystemBase {
     return run(
         () -> {
       double dalekSpinnnnSpeeeed = -0.005;
-      double neededExterminateCalculator = (((angleSubtractDegrees(gyroThePirate.getAngle(), angle)) + 180) % 360) - 180;
+      double neededExterminateCalculator = (((angleSubtractDegrees(-gyroThePirate.getAngle(), angle)) + 180) % 360) - 180;
       double re = neededExterminateCalculator * dalekSpinnnnSpeeeed;
       drive.arcadeDrive(0, constrain(1, -1, (Math.abs(re)/re)*(0.23+Math.abs(re))));
     });

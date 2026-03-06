@@ -19,7 +19,7 @@ public class LaunchSequence extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        new IntakeBalls(fuelSubsystem, 0.8).withTimeout(FuelConstants.SPIN_UP_SECONDS),
+        new IntakeBalls(fuelSubsystem, 0.8).withTimeout(2),
         new Launch());
   }
 }

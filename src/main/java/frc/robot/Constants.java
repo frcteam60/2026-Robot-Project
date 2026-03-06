@@ -53,24 +53,15 @@ public final class Constants {
     // Motor controller IDs for Fuel Mechanism motors
     public static final int Feeder_MOTOR_ID = 10;
     public static final int Angle_MOTOR_ID = 3;
-    public static final int Left_LAUNCHER_MOTOR_ID = 7;
-    public static final int Right_LAUNCHER_MOTOR_ID = 8;
+    public static final int Left_LAUNCHER_MOTOR_ID = 8;
+    public static final int Right_LAUNCHER_MOTOR_ID = 7;
 
-    // Current limit and nominal voltage for fuel mechanism motors.
+    // Current limit and nominal voltage for fuel mechanism motors.   print("hello world")
     public static final int Angle_MOTOR_CURRENT_LIMIT = 20;
     public static final int Left_MOTOR_CURRENT_LIMIT = 40;
     public static final int Right_MOTOR_CURRENT_LIMIT = 40;
 
 
-    // Voltage values for various fuel operations. These values may need to be tuned
-    // based on exact robot construction.
-    // See the Software Guide for tuning information
-    public static final double INTAKING_FEEDER_VOLTAGE = -12;
-    public static final double INTAKING_INTAKE_VOLTAGE = 10;
-    public static final double LAUNCHING_FEEDER_VOLTAGE = 9;
-    public static final double LAUNCHING_LAUNCHER_VOLTAGE = 10.6;
-    public static final double SPIN_UP_FEEDER_VOLTAGE = -6;
-    public static final double SPIN_UP_SECONDS = 1;
   }
 
   public static final class OperatorConstants {
