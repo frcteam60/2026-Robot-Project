@@ -49,6 +49,9 @@ public final class Constants {
     public static final Pose2d RED_HUB = new Pose2d(11.915, 4.035, new Rotation2d(0));
     public static final Pose2d BLUE_HUB = new Pose2d(4.626, 4.035, new Rotation2d(0));
 
+    /** what the abs encoder reads when the turret if facing straight */
+    public static final double TURRET_ABS_OFFSET = 0.8;
+
 
     // Motor controller IDs for Fuel Mechanism motors
     public static final int Feeder_MOTOR_ID = 10;

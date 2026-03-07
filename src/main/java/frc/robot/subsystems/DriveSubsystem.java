@@ -185,7 +185,7 @@ public class DriveSubsystem extends SubsystemBase {
                                                   new Rotation2d(Math.toRadians(-gyroThePirate.getAngle())),
                                                   leftEncoder.getDistance()/*0*/, 
                                                   rightEncoder.getDistance()/*0*/, 
-                                                  new Pose2d(4, 0, new Rotation2d(0)));
+                                                  new Pose2d(0, 4, new Rotation2d(0)));
     Supplier<Pose2d> poseSupplier = () -> poseEstimator.getEstimatedPosition();
     vision = new Vision(poseSupplier, field);
     // // Set can timeout. Because this project only sets parameters once on

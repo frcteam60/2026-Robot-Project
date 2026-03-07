@@ -99,6 +99,8 @@ public class RobotContainer {
     //operatorController.b().whileTrue(HungryIntake.setHungryRpm(-700));
     //operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0.0));
     //operatorController.b().whileTrue(new IntakeBalls(HungryIntake, -0.85));
+    operatorController.b().whileTrue(HungryIntake.setHungrySpeedCommand(-1));
+    operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0));
 
     operatorController.leftTrigger().whileTrue(shooter.feed(chimney, HungryIntake));
     // operatorController.leftTrigger().whileTrue(chimney.setSpeedCommand(-1));
@@ -110,9 +112,10 @@ public class RobotContainer {
     operatorController.rightBumper().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
     //operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
-     operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(0.8));
+    operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(1));
     operatorController.rightTrigger().onFalse(HungryIntake.setHungrySpeedCommand(0));
-
+//Alex is the coolest;
+//he is the coolest;
 
     // operatorController.a().onTrue(shooter.setFlyWheelSpeedCommand(-0.5));
     // operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
@@ -202,7 +205,7 @@ public class RobotContainer {
    */
   public void teleopPeriodic(){
     //driveSubsystem.autoShiftGears();
-    //shooter.trackTarget();
+    shooter.trackTarget();
     shooter.flyWheelSpin(-MathUtil.applyDeadband(operatorController.getRightY(), 0.05));
     shooter.joyStickServo(MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));
     shooter.turretSpin(-MathUtil.applyDeadband(operatorController.getRightX(), 0.05));
