@@ -11,13 +11,17 @@ import edu.wpi.first.wpilibj.Joystick;
 //import edu.wpi.first.wpilibj.Joystick;
 //import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import static frc.robot.Constants.OperatorConstants.*;
+
+import frc.robot.commands.BlueRightBumpAuto;
 import frc.robot.commands.Drive;
 import frc.robot.commands.ExampleAuto;
+import frc.robot.commands.IntakeBalls;
 //import frc.robot.commands.IntakeBalls;
 //import frc.robot.commands.LaunchSequence;
 import frc.robot.subsystems.DriveSubsystem;
@@ -66,7 +70,9 @@ public class RobotContainer {
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
     autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter, chimney, HungryIntake));
-    autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("Shoot",new BlueRightBumpAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    SmartDashboard.putData("Auto choices", autoChooser);
+    
   }
 
   /**
@@ -99,6 +105,7 @@ public class RobotContainer {
     //operatorController.b().whileTrue(HungryIntake.setHungryRpm(-700));
     //operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0.0));
     //operatorController.b().whileTrue(new IntakeBalls(HungryIntake, -0.85));
+
     operatorController.b().whileTrue(HungryIntake.setHungrySpeedCommand(-1));
     operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0));
 
@@ -114,8 +121,7 @@ public class RobotContainer {
     //operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
     operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(1));
     operatorController.rightTrigger().onFalse(HungryIntake.setHungrySpeedCommand(0));
-//Alex is the coolest;
-//he is the coolest;
+
 
     // operatorController.a().onTrue(shooter.setFlyWheelSpeedCommand(-0.5));
     // operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
@@ -123,14 +129,24 @@ public class RobotContainer {
     // operatorController.b().onTrue(shooter.setFlyWheelSpeedCommand(-0.7));
     // operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    operatorController.a().whileTrue(shooter.setFlyWheelSpeedCommandRpm(800));
-    operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    // operatorController.a().whileTrue(shooter.setFlyWheelSpeedCommandRpm(800));
+    // operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    operatorController.b().whileTrue(shooter.setFlyWheelSpeedCommandRpm(1800));
-    operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    // operatorController.b().whileTrue(shooter.setFlyWheelSpeedCommandRpm(1800));
+    // operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    operatorController.y().whileTrue(shooter.setFlyWheelSpeedCommandRpm(3500));
-    operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    // operatorController.y().whileTrue(shooter.setFlyWheelSpeedCommandRpm(3500));
+    // operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
+
+
+    // operatorController.a().onTrue(shooter.a());
+    // operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
+
+    // operatorController.b().whileTrue(shooter.b());
+    // operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
+
+    // operatorController.y().onTrue(shooter.y());
+    // operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
 
     // operatorController.a().onTrue(shooter.setDesiredTurretAngleCommand(85));
@@ -224,7 +240,6 @@ public class RobotContainer {
 
   public void autoMouseInnit(){
     shooter.resetAngleOfTurret();
-    shooter.findAllianceColor();
     shooter.findAllianceColor();
 
   }

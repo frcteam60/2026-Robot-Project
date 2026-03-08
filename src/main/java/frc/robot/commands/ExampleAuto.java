@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Turret;
@@ -23,13 +24,13 @@ public class ExampleAuto extends SequentialCommandGroup {
     // Drive backwards for .25 seconds. The driveArcadeAuto command factory
     // intentionally creates a command which does not end which allows us to control
     // the timing using the withTimeout decorator
-    new Launch(turret, chimney, intake).withTimeout(6),
-    new AutoDriveToPose(driveSubsystem, 0.5,  new Pose2d(6, 3, null)));
+    //new Launch(turret, chimney, intake).withTimeout(6),
+    new SetPoseAtStartOfAuto(driveSubsystem, new Pose2d(2, 4, new Rotation2d(0))),
+    new AutoDriveToPose(driveSubsystem, 0.5, new Pose2d(4, 4, null)));
     // Spin up the launcher for 1 second and then launch balls for 9 seconds, for a
     // total of 10 seconds
     
 
-    
   }
   public void hi() {
       System.out.println("Hi. Im the Robot");

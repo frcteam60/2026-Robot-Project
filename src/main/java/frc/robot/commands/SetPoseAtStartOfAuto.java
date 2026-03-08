@@ -17,8 +17,9 @@ public class SetPoseAtStartOfAuto extends Command {
   /** Creates a new Intake. */
 
   DriveSubsystem drive;
-  Pose2d startingPose;
+  Pose2d startingPose = new Pose2d();
   boolean ifDone = false;
+
 
   public SetPoseAtStartOfAuto(DriveSubsystem driveSystem, Pose2d poseToSet) {
     addRequirements(driveSystem);
@@ -51,6 +52,6 @@ public class SetPoseAtStartOfAuto extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return ifDone;
   }
 }

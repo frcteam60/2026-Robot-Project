@@ -48,13 +48,15 @@ public class Turret extends SubsystemBase {
   private PIDController flyWheelPidController;
   private ShooterHood hood;
   private char allianceColor;
-  private char activeHub;
+  private char activeHub = 'T';
   private boolean isHubActive;
   private boolean shouldItTrack;
   private boolean ifInManual = false;
   /** desired anlge of turret relative to the robot in rotations of the motor */
   private double desiredAngleOfTurret;
   private boolean ifInZone;
+
+  private double speedIWant = 2000;
 
   private Timer timer = new Timer();
 
@@ -79,7 +81,7 @@ public class Turret extends SubsystemBase {
     rightFlyWheelSparkMax = new SparkMax(Right_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     angleOfTurretSparkMax = new SparkMax(Angle_MOTOR_ID, MotorType.kBrushless);
 
-    angleOfTurretPIDController = new PIDController(0.07, 0, 0);
+    angleOfTurretPIDController = new PIDController(0.07, 0.001, 0.0001);
     flyWheelPidController = new PIDController(0.0001, 0.0000006, 0.0);
 
     turretEncoder = new DutyCycleEncoder(0);
@@ -136,13 +138,21 @@ public class Turret extends SubsystemBase {
       //SmartDashboard.putNumber("abs turret motor rotations", angleOfTurretSparkMax.getAbsoluteEncoder().getPosition());
       SmartDashboard.putNumber("rel turret motor rotations", angleOfTurretSparkMax.getEncoder().getPosition());
       SmartDashboard.putNumber("abs turret encoder rotations", turretEncoder.get());
+
       SmartDashboard.putBoolean("if in manual mode", ifInManual);
+      SmartDashboard.putBoolean("shouldItTrack", shouldItTrack);
+
+       SmartDashboard.putString("active hub", activeHub+"");
+
+      SmartDashboard.putBoolean("if in Zone", ifInZone);
+
       //SmartDashboard.putBoolean("if in try tracking", shouldItTrack);
       SmartDashboard.putNumber("shooter speed in rpms", rightFlyWheelSparkMax.getEncoder().getVelocity());
       SmartDashboard.putNumber("dis wheels speed", -getFlywheelSpeed(getDistanceBetween(correctedRobotSpeed, target)));
-      
+      //SmartDashboard.putNumber("Speed i Speed for shootting", speedIWant);
 
-      SmartDashboard.putNumber("robot angle", robotPose.getRotation().getRotations());
+      SmartDashboard.putNumber("robot angle rotains", robotPose.getRotation().getRotations());
+
 
       //SmartDashboard.putNumber("angle of turret neo 550", angleOfTurretSparkMax.getEncoder().getPosition());
       SmartDashboard.putNumber("hood angle real", hood.getLastAngle());
@@ -364,7 +374,8 @@ public class Turret extends SubsystemBase {
       //   }
       // }
       if(!ifInManual){
-        double desiredSpeed = getFlywheelSpeed(Math.abs(getDistanceBetween(correctedRobotSpeed, target)));
+        double desiredSpeed = getFlywheelSpeed(Math.abs(getDistanceBetween(correctedRobotSpeed, BLUE_HUB)))*1.25;
+        //SmartDashboard.putNumber("desired Speed for shootting", desiredSpeed);
         double realSpeed = setFlyWheelSpeed(desiredSpeed);
       }
       
@@ -385,7 +396,7 @@ public class Turret extends SubsystemBase {
     return run(
         () -> {
       feeder.setFeedSpeed(-1);
-      intake.setHungrySpeed(0.3);
+      intake.setHungrySpeed(0.5);
     });
 
   }
@@ -398,15 +409,16 @@ public class Turret extends SubsystemBase {
   public void rampUpAndAlignAndShoot(Feeder feeder, Intake intake){
     double desiredSpeed = getFlywheelSpeed(getDistanceBetween(robotPose, target));
     double realSpeed = setFlyWheelSpeed(desiredSpeed);
-    if (Math.abs(desiredSpeed - realSpeed) < (0.54864/getDistanceBetween(robotPose, target)) & !ifInManual){
-      feeder.setFeedSpeed(0.2);
-      intake.setHungrySpeedCommand(0.1);
-    }
+    feeder.setFeedSpeed(-1);
+    intake.setHungrySpeed(0.5);
+    // if (Math.abs(desiredSpeed - realSpeed) < (0.54864/getDistanceBetween(robotPose, target)) & !ifInManual){
+      
+    // }
     trackPose2d(robotPose, hub);
-
-    if(Math.abs(getHoodAngle(getDistanceBetween(robotPose, hub))-hood.getLastAngle()) > 5){
-          //hood.setAngle(getHoodAngle(getDistanceBetween(robotPose, hub)));
-        }
+    hood.setAngle(getHoodAngle(getDistanceBetween(robotPose, hub)));
+    // if(Math.abs(getHoodAngle(getDistanceBetween(robotPose, hub))-hood.getLastAngle()) > 5){
+    //       hood.setAngle(getHoodAngle(getDistanceBetween(robotPose, hub)));
+    //     }
 
   }
 
@@ -424,6 +436,7 @@ public class Turret extends SubsystemBase {
     if(!ifInManual){
       //trackPose2d(correctedRobotSpeed, target);
       //hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+      hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, BLUE_HUB)));
     }
     
 
@@ -452,11 +465,18 @@ public class Turret extends SubsystemBase {
     double y = (currentPose.getY()+Math.cos(currentPose.getRotation().getRadians()+angleToTurret))*centerOfRobotToTurret;
     double angle = currentPose.getRotation().getRadians() + (angleOfTurretSparkMax.getEncoder().getPosition()*(1/10)*(1/25));
     Pose2d turretFieldCentricPose = new Pose2d(x, y, new Rotation2d(angle));
-    SmartDashboard.putNumber("what tell angle turret to be auto track", ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2));
+    //SmartDashboard.putNumber("what tell angle turret to be auto track", ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2));
     //desiredAngleOfTurret = ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2);
-    SmartDashboard.putNumber("what tell angle turret to be auto track simply",((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2));
+    //SmartDashboard.putNumber("what tell angle turret to be auto track simply", ((Math.atan2(correctedRobotSpeed.getX()-BLUE_HUB.getX(), correctedRobotSpeed.getY()-BLUE_HUB.getY()) *(1/10)*(1/25))*Math.PI*2));
+    SmartDashboard.putNumber("dis to hub X", (BLUE_HUB.getX()-correctedRobotSpeed.getX()));
+    SmartDashboard.putNumber("dis to hub Y", (BLUE_HUB.getY()-correctedRobotSpeed.getY()));
+    
+    SmartDashboard.putNumber("angle atan2", Math.atan2((BLUE_HUB.getY()-correctedRobotSpeed.getY()), (BLUE_HUB.getX()-correctedRobotSpeed.getX()))/**(1.0/10.0)*(1.0/25.0)*Math.PI*2.0*/);
 
-    desiredAngleOfTurret = -(angleSubtractRotations(robotPose.getRotation().getRotations(), 0)*250);
+    double angleOfTurretFieldCen = Math.atan2((BLUE_HUB.getY()-correctedRobotSpeed.getY()), (BLUE_HUB.getX()-correctedRobotSpeed.getX()))/(Math.PI*2.0);
+    //desiredAngleOfTurret = (Math.atan2((BLUE_HUB.getX()-correctedRobotSpeed.getX()), (BLUE_HUB.getY()-correctedRobotSpeed.getY()))*(1.0/10.0)*(1.0/25.0)*Math.PI*2.0);
+
+    desiredAngleOfTurret = -(angleSubtractRotations(correctedRobotSpeed.getRotation().getRotations(), angleOfTurretFieldCen)*250);
 
   }
 
@@ -467,7 +487,8 @@ public class Turret extends SubsystemBase {
    * @return return rpm
    */
   public double getFlywheelSpeed(double dis){
-    return (6.56+0.0725*dis+0.0606*Math.pow(dis, 2))*30/Math.PI/0.0254;
+    //return (6.56+0.0725*dis+0.0606*Math.pow(dis, 2))*30/Math.PI/0.0254;
+    return 3069-208*dis+117*Math.pow(dis, 2);
   }
   /**
    * return the desired hood angle
@@ -476,11 +497,12 @@ public class Turret extends SubsystemBase {
    * @return return in degrees
    */
   public static double getHoodAngle(double dis){
-    return Math.abs(89.9*Math.log(Math.abs(-0.111*dis)));
+    return Math.abs(Math.pow(2.718, -0.111*dis)*89.9);
   }
 
   // A method to stop the rollers
   public void stop() {
+    //System.out.println("stop");
     //feederRoller.set(0);
     //leftFlyWheelSparkMax.set(0);
   }
@@ -562,7 +584,7 @@ public class Turret extends SubsystemBase {
     return run(
         () -> {
       if(ifInManual){
-        angleOfTurretSparkMax.set(0.1);
+        angleOfTurretSparkMax.set(-0.1);
       }
     });
     
@@ -577,7 +599,7 @@ public class Turret extends SubsystemBase {
     return run(
         () -> {
       if(ifInManual){
-        angleOfTurretSparkMax.set(-0.1);
+        angleOfTurretSparkMax.set(0.1);
       }
     });
     
@@ -644,5 +666,36 @@ public class Turret extends SubsystemBase {
 
   public void fixAutoJerk(){
     desiredAngleOfTurret = angleOfTurretSparkMax.getEncoder().getPosition();
+  }
+
+  public Command a(){
+    return runOnce(
+        () -> {
+      speedIWant -= 100;
+    });
+    
+  }
+
+  /**
+   * for manual over ride
+   * 
+   * @return
+   */
+  public Command b(){
+    return run(
+        () -> {
+      
+      setFlyWheelSpeed(speedIWant);
+    });
+    
+  }
+
+  public Command y(){
+    return runOnce(
+        () -> {
+      speedIWant += 100; 
+      
+    });
+    
   }
 }

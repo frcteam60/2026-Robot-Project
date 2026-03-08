@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.PWM1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -91,23 +92,23 @@ public class DriveSubsystem extends SubsystemBase {
   private final PIDController pidController;
   private final DifferentialDrive drive;
   private final DifferentialDrivePoseEstimator poseEstimator;
-  //private final Encoder leftEncoder;
-  //private final Encoder rightEncoder;
+  private final Encoder leftEncoder;
+  private final Encoder rightEncoder;
 
-  private final Encoder leftEncoder = new Encoder(2,1);
-  private final Encoder rightEncoder = new Encoder(3,4);
+  //private final Encoder leftEncoder = new Encoder(2,1);
+  //private final Encoder rightEncoder = new Encoder(3,4);
   
   
   private static final double cpr = 360; //if am-3132
   
 
-  private static final double whd = 6; // for 6 inch wheel
+  private static final double whd = 0.1524; // for 6 inch wheel in meters
 
   /**
    * 
    */
   public DriveSubsystem() {
-     
+    SignalLogger.enableAutoLogging(false);
     //Shifter = new Solenoid(PneumaticsModuleType.REVPH, 0);
 
     leftLeader = new TalonFX(1);
@@ -166,9 +167,9 @@ public class DriveSubsystem extends SubsystemBase {
     // leftFollower.setInverted(true);
     // leftLeader.setInverted(true);
 
-    //leftEncoder = new Encoder(2,1);
+    leftEncoder = new Encoder(2,1);
     leftEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
-    //rightEncoder = new Encoder(3,4);
+    rightEncoder = new Encoder(4,3);
     rightEncoder.setDistancePerPulse(Math.PI*whd/cpr); //distance per pulse is pi* (wheel diameter / counts per revolution)
     
     gyroThePirate = new AHRS(NavXComType.kMXP_SPI);
@@ -183,9 +184,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     poseEstimator = new DifferentialDrivePoseEstimator(new DifferentialDriveKinematics(29),
                                                   new Rotation2d(Math.toRadians(-gyroThePirate.getAngle())),
-                                                  leftEncoder.getDistance()/*0*/, 
-                                                  rightEncoder.getDistance()/*0*/, 
-                                                  new Pose2d(0, 4, new Rotation2d(0)));
+                                                  leftEncoder.getDistance(), 
+                                                  rightEncoder.getDistance(), 
+                                                  new Pose2d(3, 4, new Rotation2d(0)));
     Supplier<Pose2d> poseSupplier = () -> poseEstimator.getEstimatedPosition();
     vision = new Vision(poseSupplier, field);
     // // Set can timeout. Because this project only sets parameters once on
@@ -224,9 +225,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    poseEstimator.update(new Rotation2d(-gyroThePirate.getAngle()),
-                          /*leftEncoder.getDistance()*/0, 
-                          /*rightEncoder.getDistance()*/0);
+    poseEstimator.update(new Rotation2d(Math.toRadians(-gyroThePirate.getAngle())),
+                          leftEncoder.getDistance(), 
+                          rightEncoder.getDistance());
                         
     vision.updatePoseEstimation(poseEstimator);
     count++;
@@ -236,7 +237,9 @@ public class DriveSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("X speed", robotSpeed.getX());
       count = 0;
     }
-    
+    SmartDashboard.putNumber("left encoder", leftEncoder.getDistance());
+    SmartDashboard.putNumber("right encoder", rightEncoder.getDistance());
+
     SmartDashboard.putNumber("od Y", poseEstimator.getEstimatedPosition().getY());
     SmartDashboard.putNumber("od X", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putNumber("angle of gyro", -gyroThePirate.getAngle());

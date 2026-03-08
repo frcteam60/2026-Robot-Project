@@ -61,8 +61,8 @@ public final class Constants {
 
     // Current limit and nominal voltage for fuel mechanism motors.   print("hello world")
     public static final int Angle_MOTOR_CURRENT_LIMIT = 20;
-    public static final int Left_MOTOR_CURRENT_LIMIT = 40;
-    public static final int Right_MOTOR_CURRENT_LIMIT = 40;
+    public static final int Left_MOTOR_CURRENT_LIMIT = 60;
+    public static final int Right_MOTOR_CURRENT_LIMIT = 60;
 
 
   }
