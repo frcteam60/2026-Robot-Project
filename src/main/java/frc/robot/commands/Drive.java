@@ -11,8 +11,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Drive extends Command {
@@ -25,6 +27,7 @@ public class Drive extends Command {
   double turning;
   double turnValue;
   double drive;
+  private SlewRateLimiter aclDamper;
 
   public Drive(DriveSubsystem driveSystem, CommandJoystick vroomVroomStick, Joystick stearingWheeeeel) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -32,6 +35,7 @@ public class Drive extends Command {
     driveSubsystem = driveSystem;
     this.vroomVroomStick = vroomVroomStick;
     steeringWheel = stearingWheeeeel;
+    aclDamper = new SlewRateLimiter(19, -24, 0);
   }
 
   // Called when the command is initially scheduled.
@@ -58,7 +62,7 @@ public class Drive extends Command {
     // driveSubsystem.driveArcade(-constrain(1, -1, 2*vroomVroomStick.getY()),
     //         constrain(1, -1, Math.abs(turning)/turning)*Math.sqrt(Math.abs(2.5*turning)));
 
-    driveSubsystem.driveArcade(drive, -turnValue);
+    driveSubsystem.driveArcade(aclDamper.calculate(drive), -turnValue);
 
 
   

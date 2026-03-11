@@ -148,7 +148,7 @@ public class Vision
         poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(),
                                          pose.timestampSeconds,
                                          camera.curStdDevs);
-        System.out.println(pose.estimatedPose.toPose2d());
+        //System.out.println(pose.estimatedPose.toPose2d());
       }
       
     }
@@ -340,29 +340,35 @@ public class Vision
      * Back Left Camera
      */
     BACK_LEFT_CAM("backLeft",
-              new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(135)),
-              new Translation3d(Units.inchesToMeters(-11.3695),
-                                Units.inchesToMeters(-11.376),
+              new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(-135)),
+              new Translation3d(Units.inchesToMeters(-5.4909),
+                                Units.inchesToMeters(11.5),
                                 Units.inchesToMeters(8.75)),
-              VecBuilder.fill(2, 2, 3), VecBuilder.fill(0.5, 0.5, 0.8)),
+              VecBuilder.fill(2, 2, 1), VecBuilder.fill(0.5, 0.5, 1)),
     /**
      * Right Camera
-     */
-    FRONT_RIGHT_CAM("frontRight",
+     * FRONT_RIGHT_CAM("frontRight",
                new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(-15)),
-               new Translation3d(Units.inchesToMeters(11.3695),
+               new Translation3d(Units.inchesToMeters(17.2445),
                                  Units.inchesToMeters(-11.376),
                                  Units.inchesToMeters(8.75)),
                VecBuilder.fill(2, 2, 3), VecBuilder.fill(0.5, 0.5, 1)),
+     */
+    FRONT_RIGHT_CAM("frontRight",
+               new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(-15)),
+               new Translation3d(Units.inchesToMeters(17.2445),
+                                 Units.inchesToMeters(-13),
+                                 Units.inchesToMeters(8.75)),
+               VecBuilder.fill(2, 2, 1), VecBuilder.fill(0.5, 0.5, 1)),
      /**          
      * Front Left Camera
      */
     FRONT_LEFT_CAM("frontLeft",
                new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(15)),
-               new Translation3d(Units.inchesToMeters(11.3695),
-                                 Units.inchesToMeters(11.376),
+               new Translation3d(Units.inchesToMeters(17.2445),
+                                 Units.inchesToMeters(11.5),
                                  Units.inchesToMeters(8.75)),
-               VecBuilder.fill(2, 2, 3), VecBuilder.fill(0.5, 0.5, 1));
+               VecBuilder.fill(2, 2, 1), VecBuilder.fill(0.5, 0.5, 1));
 
     /**
      * Latency alert to use when high latency is detected.

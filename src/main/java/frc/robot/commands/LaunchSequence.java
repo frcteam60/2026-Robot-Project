@@ -15,11 +15,11 @@ import frc.robot.subsystems.Intake;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class LaunchSequence extends SequentialCommandGroup {
   /** Creates a new LaunchSequence. */
-  public LaunchSequence(Intake fuelSubsystem) {
+  public LaunchSequence(Turret shooter, Feeder feeder, Intake intake) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        new IntakeBalls(fuelSubsystem, 0.8).withTimeout(2),
-        new Launch());
+        new RampUp(shooter).withTimeout(3),
+        new Launch(shooter,feeder, intake));
   }
 }
