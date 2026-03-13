@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -55,7 +56,9 @@ public class Turret extends SubsystemBase {
   /** desired anlge of turret relative to the robot in rotations of the motor */
   private double desiredAngleOfTurret;
   private boolean ifInZone;
-
+  /**
+   * if auto shooting in manual */
+  private boolean ifAutoShooting = false;
   private double speedIWant = 2000;
 
   private Timer timer = new Timer();
@@ -63,7 +66,7 @@ public class Turret extends SubsystemBase {
   /** the robots current Pose2d */
   private Pose2d robotPose;
   /** the robot Pose Corrected For Robot Speed */
-  private Pose2d correctedRobotSpeed;
+  private Pose2d correctedRobotPose;
 
   /**What the robot should shoot at. like the hub and passing spots*/
   private Pose2d target = new Pose2d();
@@ -81,7 +84,7 @@ public class Turret extends SubsystemBase {
     rightFlyWheelSparkMax = new SparkMax(Right_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     angleOfTurretSparkMax = new SparkMax(Angle_MOTOR_ID, MotorType.kBrushless);
 
-    angleOfTurretPIDController = new PIDController(0.07, 0.002, 0.0001);
+    angleOfTurretPIDController = new PIDController(0.07, 0.003, 0.0001);
     flyWheelPidController = new PIDController(0.0001, 0.0, 0.0);
 
     turretEncoder = new DutyCycleEncoder(0);
@@ -151,12 +154,13 @@ public class Turret extends SubsystemBase {
 
       SmartDashboard.putString("target", target.toString());
 
+      SmartDashboard.putNumber("dis angle field cen", Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0));
       //SmartDashboard.putBoolean("if in try tracking", shouldItTrack);
       SmartDashboard.putNumber("shooter speed in rpms", rightFlyWheelSparkMax.getEncoder().getVelocity());
-      //SmartDashboard.putNumber("dis wheels speed", -getFlywheelSpeed(getDistanceBetween(correctedRobotSpeed, target)));
+      //SmartDashboard.putNumber("dis wheels speed", -getFlywheelSpeed(getDistanceBetween(correctedRobotPose, target)));
       //SmartDashboard.putNumber("Speed i Speed for shootting", speedIWant);
 
-      SmartDashboard.putNumber("robot angle rotains", robotPose.getRotation().getRotations());
+      SmartDashboard.putNumber("robot angle rotations", robotPose.getRotation().getRotations());
 
 
       //SmartDashboard.putNumber("angle of turret neo 550", angleOfTurretSparkMax.getEncoder().getPosition());
@@ -207,9 +211,9 @@ public class Turret extends SubsystemBase {
       }
     }
     
-    correctedRobotSpeed = new Pose2d(
-                                    robotPose.getX() + SmartDashboard.getNumber("X speed", 0),
-                                    robotPose.getY() + SmartDashboard.getNumber("Y speed", 0),
+    correctedRobotPose = new Pose2d(
+                                    robotPose.getX() + (SmartDashboard.getNumber("X speed", 0)*TIME_OF_FLIGHT),
+                                    robotPose.getY() + (SmartDashboard.getNumber("Y speed", 0)*TIME_OF_FLIGHT),
                                     robotPose.getRotation());
 
     // code for finding if hub is active 
@@ -352,6 +356,7 @@ public class Turret extends SubsystemBase {
   public void setAngle(double rotations) {
 
     //angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(193.75, -193.75, rotations)));
+
     angleOfTurretSparkMax.set(angleOfTurretPIDController.calculate(angleOfTurretSparkMax.getEncoder().getPosition(), constrain(85, -85, rotations)));
   }
 
@@ -381,24 +386,37 @@ public class Turret extends SubsystemBase {
     return run(
         () -> {
       // if(shouldItTrack){
-      //   double desiredSpeed = getFlywheelSpeed(getDistanceBetween(correctedRobotSpeed, target));
+      //   double desiredSpeed = getFlywheelSpeed(getDistanceBetween(correctedRobotPose, target));
       //   double realSpeed = setFlyWheelSpeed(desiredSpeed);
-      //   if (Math.abs(desiredSpeed - realSpeed) < (0.54864/getDistanceBetween(correctedRobotSpeed, target)) & !ifInManual){
+      //   if (Math.abs(desiredSpeed - realSpeed) < (0.54864/getDistanceBetween(correctedRobotPose, target)) & !ifInManual){
       //     feeder.setFeedSpeed(0.2);
       //     intake.setHungrySpeedCommand(0.1);
       //   }
       // }
+      ifAutoShooting = true;
       if(!ifInManual){
-        double desiredSpeed = getFlywheelSpeed(Math.abs(getDistanceBetween(correctedRobotSpeed, target)))*1.25;
+        double desiredSpeed = getFlywheelSpeed(Math.abs(getDistanceBetween(correctedRobotPose, target)))*1.1;
+        //SmartDashboard.putNumber("desired Speed for shootting", desiredSpeed);
+        double realSpeed = setFlyWheelSpeed(desiredSpeed);
+      }else if(ifInManual){
+        double desiredSpeed = getFlywheelSpeed(Math.abs(getDistanceBetween(correctedRobotPose, target)))*1.1;
         //SmartDashboard.putNumber("desired Speed for shootting", desiredSpeed);
         double realSpeed = setFlyWheelSpeed(desiredSpeed);
       }
+      
       
       //SmartDashboard.putNumber("dis wheels speed shoot", -desiredSpeed);
       // feeder.setFeedSpeed(-1);
       // intake.setHungrySpeed(0.3);
     });
-  
+  }
+
+  /**
+   * to be called after auto shooting
+   */
+  public void stopFlyWheelAfter(){
+    ifAutoShooting = false;
+    rightFlyWheelSparkMax.set(0);
   }
 
    /**
@@ -458,17 +476,17 @@ public class Turret extends SubsystemBase {
    */
   public void  trackTarget(){
     // if(shouldItTrack & !ifInManual){
-    //   trackPose2d(correctedRobotSpeed, target);
+    //   trackPose2d(correctedRobotPose, target);
     // }
 
     // if(!ifInManual){
-    //   //trackPose2d(correctedRobotSpeed, target);
-    //   //hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+    //   //trackPose2d(correctedRobotPose, target);
+    //   //hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
     //   if(ifInZone){
-    //     if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target))-hood.getLastAngle()) > 5){
-    //       hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+    //     if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotPose, target))-hood.getLastAngle()) > 5){
+    //       hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
     //     }
-    //     //hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+    //     //hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
     //   }else{
     //     hood.setAngle(80);
     //   }
@@ -480,16 +498,16 @@ public class Turret extends SubsystemBase {
     
 
     if (ifInZone & !ifInManual){
-        if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target))-hood.getLastAngle()) > 4){
-          hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+        if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotPose, target))-hood.getLastAngle()) > 2){
+          hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
         }
     } 
     if(!ifInManual & !ifInZone){
       hood.setAngle(54.5);
     }
     
-    // if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target))-hood.getLastAngle()) > 5){
-    //        hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotSpeed, target)));
+    // if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotPose, target))-hood.getLastAngle()) > 5){
+    //        hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
     // }
 
   }
@@ -506,17 +524,21 @@ public class Turret extends SubsystemBase {
     // Pose2d turretFieldCentricPose = new Pose2d(x, y, new Rotation2d(angle));
     //SmartDashboard.putNumber("what tell angle turret to be auto track", ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2));
     //desiredAngleOfTurret = ((Math.atan2(x-target.getX(), y-target.getY()) *(1/10)*(1/25))*Math.PI*2);
-    //SmartDashboard.putNumber("what tell angle turret to be auto track simply", ((Math.atan2(correctedRobotSpeed.getX()-BLUE_HUB.getX(), correctedRobotSpeed.getY()-BLUE_HUB.getY()) *(1/10)*(1/25))*Math.PI*2));
-    //SmartDashboard.putNumber("dis to hub X", (BLUE_HUB.getX()-correctedRobotSpeed.getX()));
-    //SmartDashboard.putNumber("dis to hub Y", (BLUE_HUB.getY()-correctedRobotSpeed.getY()));
+    //SmartDashboard.putNumber("what tell angle turret to be auto track simply", ((Math.atan2(correctedRobotPose.getX()-BLUE_HUB.getX(), correctedRobotPose.getY()-BLUE_HUB.getY()) *(1/10)*(1/25))*Math.PI*2));
+    //SmartDashboard.putNumber("dis to hub X", (BLUE_HUB.getX()-correctedRobotPose.getX()));
+    //SmartDashboard.putNumber("dis to hub Y", (BLUE_HUB.getY()-correctedRobotPose.getY()));
     
-    //SmartDashboard.putNumber("angle atan2", Math.atan2((BLUE_HUB.getY()-correctedRobotSpeed.getY()), (BLUE_HUB.getX()-correctedRobotSpeed.getX()))/**(1.0/10.0)*(1.0/25.0)*Math.PI*2.0*/);
+    //SmartDashboard.putNumber("angle atan2", Math.atan2((BLUE_HUB.getY()-correctedRobotPose.getY()), (BLUE_HUB.getX()-correctedRobotPose.getX()))/**(1.0/10.0)*(1.0/25.0)*Math.PI*2.0*/);
 
     double angleOfTurretFieldCen = Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0);
-    //desiredAngleOfTurret = (Math.atan2((BLUE_HUB.getX()-correctedRobotSpeed.getX()), (BLUE_HUB.getY()-correctedRobotSpeed.getY()))*(1.0/10.0)*(1.0/25.0)*Math.PI*2.0);
+    //desiredAngleOfTurret = (Math.atan2((BLUE_HUB.getX()-correctedRobotPose.getX()), (BLUE_HUB.getY()-correctedRobotPose.getY()))*(1.0/10.0)*(1.0/25.0)*Math.PI*2.0);
     //SmartDashboard.putNumber("tracking arctan", Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0));
-    desiredAngleOfTurret = -(angleSubtractRotations(robotPose.getRotation().getRotations(), angleOfTurretFieldCen)*250);
-
+    double tempAngle = -(angleSubtractRotations(robotPose.getRotation().getRotations(), angleOfTurretFieldCen)*210);
+    if(isInRange(90, -90, tempAngle)){
+      desiredAngleOfTurret = tempAngle;
+    }
+    //desiredAngleOfTurret = tempAngle;
+  
   }
 
   /**
@@ -527,7 +549,7 @@ public class Turret extends SubsystemBase {
    */
   public double getFlywheelSpeed(double dis){
     //return (6.56+0.0725*dis+0.0606*Math.pow(dis, 2))*30/Math.PI/0.0254;
-    return 3069-208*dis+117*Math.pow(dis, 2);
+    return (3069-208*dis+117*Math.pow(dis, 2))*0.89;
   }
   /**
    * return the desired hood angle
@@ -605,6 +627,21 @@ public class Turret extends SubsystemBase {
       return input;
   }
 
+  /**
+   * 
+   * @param hi
+   * @param low
+   * @param input
+   * @return
+   */
+  public boolean isInRange(double hi, double low, double input){
+    if((input >= low) & (input <= hi)){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
   public void resetAngleOfTurret(){
     //if the abs encoder is unplugged dont use it
     double absEncoder = turretEncoder.get();
@@ -612,7 +649,7 @@ public class Turret extends SubsystemBase {
       angleOfTurretSparkMax.getEncoder().setPosition(0);
       System.out.println("The Abs Encoder Is Unplugged \n\n\n");
     } else{
-      angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), TURRET_ABS_OFFSET));
+      angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(absEncoder, TURRET_ABS_OFFSET));
     }
     //angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), TURRET_ABS_OFFSET));
     //angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), offSet));
@@ -687,7 +724,7 @@ public class Turret extends SubsystemBase {
     }
   }
   public void flyWheelSpin(double xboxPos){
-    if(ifInManual){
+    if(ifInManual & !ifAutoShooting){
       rightFlyWheelSparkMax.set(xboxPos);
     }
   }

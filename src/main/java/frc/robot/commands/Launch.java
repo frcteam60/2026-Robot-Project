@@ -45,7 +45,7 @@ public class Launch extends Command {
   // command doesn't require updating any values while running
   @Override
   public void execute() {
-    shooter.feed(turretFeed, intake);
+    shooter.feedNonCommand(turretFeed, intake);
   }
 
   // Called once the command ends or is interrupted. Stop the rollers

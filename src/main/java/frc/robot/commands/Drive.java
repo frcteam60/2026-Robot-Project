@@ -35,7 +35,7 @@ public class Drive extends Command {
     driveSubsystem = driveSystem;
     this.vroomVroomStick = vroomVroomStick;
     steeringWheel = stearingWheeeeel;
-    aclDamper = new SlewRateLimiter(19, -24, 0);
+    aclDamper = new SlewRateLimiter(4.5, -4.8, 0);
   }
 
   // Called when the command is initially scheduled.

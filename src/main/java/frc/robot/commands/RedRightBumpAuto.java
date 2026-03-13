@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import static frc.robot.Constants.FuelConstants.*;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -30,11 +32,12 @@ public class RedRightBumpAuto extends SequentialCommandGroup {
     // Drive backwards for .25 seconds. The driveArcadeAuto command factory
     // intentionally creates a command which does not end which allows us to control
     // the timing using the withTimeout decorator
-    new SetPoseAtStartOfAuto(driveSubsystem, new Pose2d(3.69, 2.3749, new Rotation2d(0))),
-    new Launch(turret, chimney, intake).withTimeout(6),
-    driveAndPickUp,
-    new AutoDriveToPose(driveSubsystem, -0.5,  new Pose2d(3.5, 23749., null)),
-    new Launch(turret, chimney, intake).withTimeout(10));
+    new SetPoseAtStartOfAuto(driveSubsystem, RIGHT_RED_BUMP),
+    new LaunchSequence(turret, chimney, intake).withTimeout(15));
+    //new Launch(turret, chimney, intake).withTimeout(6));
+    //driveAndPickUp,
+    //new AutoDriveToPose(driveSubsystem, -0.5,  new Pose2d(3.5, 23749., null)),
+    //new Launch(turret, chimney, intake).withTimeout(10));
     // Spin up the launcher for 1 second and then launch balls for 9 seconds, for a
     // total of 10 seconds
 

@@ -49,6 +49,22 @@ public final class Constants {
     public static final Pose2d RED_HUB = new Pose2d(11.915, 4.035, new Rotation2d(0));
     public static final Pose2d BLUE_HUB = new Pose2d(4.626, 4.035, new Rotation2d(0));
 
+
+    public static final Pose2d RIGHT_BLUE_BUMP = new Pose2d(3.57, 2.52, new Rotation2d(0));
+
+    public static final Pose2d LEFT_RED_BUMP = new Pose2d(12.7, 2.52, new Rotation2d(Math.PI));
+
+    public static final Pose2d LEFT_BLUE_BUMP = new Pose2d(3.57, 5.54, new Rotation2d(0));
+
+    public static final Pose2d RIGHT_RED_BUMP = new Pose2d(12.7, 5.54, new Rotation2d(Math.PI));
+
+    public static final Pose2d BLUE_CENTER_AUTO_START = new Pose2d(3.57, 4.03, new Rotation2d(0));
+
+    public static final Pose2d RED_CENTER_AUTO_START = new Pose2d(12.7, 4.03, new Rotation2d(Math.PI));
+
+    /** time ball take from shooter to hub */
+    public static final double TIME_OF_FLIGHT = 1.16;
+
     /** what the abs encoder reads when the turret if facing straight */
     public static final double TURRET_ABS_OFFSET = 0.8;
 

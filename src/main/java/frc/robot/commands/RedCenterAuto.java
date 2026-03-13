@@ -18,9 +18,9 @@ import frc.robot.subsystems.Intake;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class BlueRightBumpAuto extends SequentialCommandGroup {
+public class RedCenterAuto extends SequentialCommandGroup {
   /** Creates a new ExampleAuto. */
-  public BlueRightBumpAuto(DriveSubsystem driveSubsystem, Turret turret, Feeder chimney, Intake intake) {
+  public RedCenterAuto(DriveSubsystem driveSubsystem, Turret turret, Feeder chimney, Intake intake) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     
@@ -32,7 +32,7 @@ public class BlueRightBumpAuto extends SequentialCommandGroup {
     // Drive backwards for .25 seconds. The driveArcadeAuto command factory
     // intentionally creates a command which does not end which allows us to control
     // the timing using the withTimeout decorator
-    new SetPoseAtStartOfAuto(driveSubsystem, RIGHT_BLUE_BUMP),
+    new SetPoseAtStartOfAuto(driveSubsystem, RED_CENTER_AUTO_START),
     new LaunchSequence(turret, chimney, intake).withTimeout(15));
     //new Launch(turret, chimney, intake).withTimeout(6));
     //driveAndPickUp,
@@ -45,5 +45,6 @@ public class BlueRightBumpAuto extends SequentialCommandGroup {
   }
   public void hi() {
       System.out.println("Hi. Im the Robot");
+      System.out.println("Feed me fuel");
     }
 }

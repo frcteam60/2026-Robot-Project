@@ -19,9 +19,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import static frc.robot.Constants.OperatorConstants.*;
 
 import frc.robot.commands.BlueRightBumpAuto;
+import frc.robot.commands.BlueCenterAuto;
+import frc.robot.commands.BlueLeftBumpAuto;
 import frc.robot.commands.Drive;
 import frc.robot.commands.ExampleAuto;
 import frc.robot.commands.IntakeBalls;
+import frc.robot.commands.RedCenterAuto;
+import frc.robot.commands.RedLeftBumpAuto;
+import frc.robot.commands.RedRightBumpAuto;
 //import frc.robot.commands.IntakeBalls;
 //import frc.robot.commands.LaunchSequence;
 import frc.robot.subsystems.DriveSubsystem;
@@ -70,7 +75,12 @@ public class RobotContainer {
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
     autoChooser.setDefaultOption("Autonomous", new ExampleAuto(driveSubsystem, shooter, chimney, HungryIntake));
-    autoChooser.addOption("Shoot",new BlueRightBumpAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("BlueRightBumpAuto", new BlueRightBumpAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("BlueLeftBumpAuto", new BlueLeftBumpAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("RedRightBumpAuto", new RedRightBumpAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("RedLeftBumpAuto", new RedLeftBumpAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("BlueCenterAuto", new BlueCenterAuto(driveSubsystem, shooter, chimney, HungryIntake));
+    autoChooser.addOption("RedCenterAuto", new RedCenterAuto(driveSubsystem, shooter, chimney, HungryIntake));
     SmartDashboard.putData("Auto choices", autoChooser);
     
   }
@@ -116,7 +126,8 @@ public class RobotContainer {
     operatorController.leftTrigger().onFalse(chimney.setSpeedCommand(0));
 
     operatorController.rightBumper().whileTrue(shooter.shoot(chimney, HungryIntake));
-    operatorController.rightBumper().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    operatorController.rightBumper().onFalse(Commands.runOnce(shooter::stopFlyWheelAfter));
+    //operatorController.rightBumper().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
     //operatorController.rightTrigger().whileTrue(HungryIntake.setHungryRpm(1000));
     operatorController.rightTrigger().whileTrue(HungryIntake.setHungrySpeedCommand(1));

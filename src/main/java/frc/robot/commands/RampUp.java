@@ -24,9 +24,6 @@ public class RampUp extends Command {
     this.shooter = fuelSystem;
     
   }
-  public RampUp() {
-
-  }
 
   // Called when the command is initially scheduled. Set the rollers to the
   // appropriate values for intaking
