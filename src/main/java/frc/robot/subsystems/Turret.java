@@ -529,11 +529,12 @@ public class Turret extends SubsystemBase {
     //SmartDashboard.putNumber("angle atan2", Math.atan2((BLUE_HUB.getY()-correctedRobotPose.getY()), (BLUE_HUB.getX()-correctedRobotPose.getX()))/**(1.0/10.0)*(1.0/25.0)*Math.PI*2.0*/);
     /**angle of the turre field contric */
     double angleOfTurretFieldCen = (Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0));
-    SmartDashboard.putNumber("dis angle field centric", angleOfTurretFieldCen);
+    SmartDashboard.putNumber("desired angle field centric", angleOfTurretFieldCen);
     //desiredAngleOfTurret = (Math.atan2((BLUE_HUB.getX()-correctedRobotPose.getX()), (BLUE_HUB.getY()-correctedRobotPose.getY()))*(1.0/10.0)*(1.0/25.0)*Math.PI*2.0);
     //SmartDashboard.putNumber("tracking arctan", Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0));
-    double tempAngle = -(angleSubtractRotations(robotPose.getRotation().getRotations(), angleOfTurretFieldCen)*160);
-    SmartDashboard.putNumber("dis rotations of the neo550", tempAngle);
+    // 250 was 160
+    double tempAngle = -(angleSubtractRotations(robotPose.getRotation().getRotations(), angleOfTurretFieldCen)*250);
+    SmartDashboard.putNumber("desired rotations of the neo550", tempAngle);
     if(isInRange(90, -90, tempAngle)){
       desiredAngleOfTurret = tempAngle;
     }
