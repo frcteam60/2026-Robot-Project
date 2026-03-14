@@ -359,7 +359,7 @@ public class Vision
                new Translation3d(Units.inchesToMeters(17.2445),
                                  Units.inchesToMeters(-13),
                                  Units.inchesToMeters(8.75)),
-               VecBuilder.fill(1, 1, 1.5), VecBuilder.fill(0.5, 0.5, 1)),
+               VecBuilder.fill(0.2, 0.2, 0.2), VecBuilder.fill(0.1, 0.1, 0.2)),
      /**          
      * Front Left Camera
      */
@@ -368,7 +368,7 @@ public class Vision
                new Translation3d(Units.inchesToMeters(17.2445),
                                  Units.inchesToMeters(11.5),
                                  Units.inchesToMeters(8.75)),
-               VecBuilder.fill(1, 1, 1.5), VecBuilder.fill(0.5, 0.5, 1));
+               VecBuilder.fill(0.2, 0.2, 0.2), VecBuilder.fill(0.1, 0.1, 0.2));
 
     /**
      * Latency alert to use when high latency is detected.

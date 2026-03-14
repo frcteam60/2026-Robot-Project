@@ -35,7 +35,7 @@ public class Drive extends Command {
     driveSubsystem = driveSystem;
     this.vroomVroomStick = vroomVroomStick;
     steeringWheel = stearingWheeeeel;
-    aclDamper = new SlewRateLimiter(4.5, -4.8, 0);
+    aclDamper = new SlewRateLimiter(1.8, -1.9, 0);
   }
 
   // Called when the command is initially scheduled.
@@ -62,8 +62,22 @@ public class Drive extends Command {
     // driveSubsystem.driveArcade(-constrain(1, -1, 2*vroomVroomStick.getY()),
     //         constrain(1, -1, Math.abs(turning)/turning)*Math.sqrt(Math.abs(2.5*turning)));
 
-    driveSubsystem.driveArcade(aclDamper.calculate(drive), -turnValue);
 
+    
+
+   // SmartDashboard.putNumber("drive power", drive);
+    if(SmartDashboard.getBoolean("if in jerk mode", false)){
+      driveSubsystem.driveArcade(drive, -turnValue);
+
+    }else{
+      if(drive < 0.3 & drive > 0.08){
+        drive = 0.3;
+      }else if(drive > -0.3 & drive < -0.08){
+        drive = -0.3;
+      }
+      
+      driveSubsystem.driveArcade(aclDamper.calculate(drive), -turnValue);
+    }
 
   
 

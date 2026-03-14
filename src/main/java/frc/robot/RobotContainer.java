@@ -197,6 +197,9 @@ public class RobotContainer {
 
     vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
     vroomVroomStick.button(1).onFalse(Commands.runOnce(driveSubsystem::shiftToLow));
+
+    vroomVroomStick.button(5).onTrue(Commands.runOnce(driveSubsystem::HighJerk));
+    vroomVroomStick.button(5).onFalse(Commands.runOnce(driveSubsystem::noJerk));
     
     //driverController.rightBumper().onTrue(Commands.runOnce(driveSubsystem::shiftGears));
     
@@ -233,9 +236,10 @@ public class RobotContainer {
   public void teleopPeriodic(){
     //driveSubsystem.autoShiftGears();
     shooter.trackTarget();
-    shooter.flyWheelSpin(-MathUtil.applyDeadband(operatorController.getRightY(), 0.05));
-    shooter.joyStickServo(MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));
-    shooter.turretSpin(-MathUtil.applyDeadband(operatorController.getRightX(), 0.05));
+    shooter.hoodTrack();
+    shooter.flyWheelSpin(-MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));
+    //shooter.joyStickServo(MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));
+    shooter.turretSpin(-MathUtil.applyDeadband(operatorController.getRightX(), 0.07));
 
   }
 

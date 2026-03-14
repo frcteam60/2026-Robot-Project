@@ -47,6 +47,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
@@ -78,7 +79,9 @@ public class DriveSubsystem extends SubsystemBase {
   private Pose2d robotSpeed;
 
   
-  //private final Solenoid Shifter;
+  private final Solenoid Shifter;
+    // Compressor connected to a PH with a default CAN ID (1)
+  private final Compressor m_compressor;
   
   private final TalonFX leftLeader;
   private final TalonFX leftFollower;
@@ -109,8 +112,9 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public DriveSubsystem() {
     SignalLogger.enableAutoLogging(false);
-    //Shifter = new Solenoid(PneumaticsModuleType.REVPH, 0);
-
+    Shifter = new Solenoid(PneumaticsModuleType.REVPH, 0);
+    m_compressor = new Compressor(PneumaticsModuleType.REVPH);
+    m_compressor.enableAnalog(70, 110);
     leftLeader = new TalonFX(1);
     leftFollower = new TalonFX(2);
 
@@ -260,6 +264,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void setRobotPose(Pose2d poseMeters){
     poseEstimator.resetPose(poseMeters);
+    gyroThePirate.setAngleAdjustment(poseMeters.getRotation().getDegrees());
   }
   /**
    * field centric drive 
@@ -346,12 +351,20 @@ public class DriveSubsystem extends SubsystemBase {
     // }
   }
 
+  public void HighJerk(){
+    SmartDashboard.putBoolean("if in jerk mode", true);
+  }
+
+  public void noJerk(){
+    SmartDashboard.putBoolean("if in jerk mode", false);
+  }
+
   public void shiftToHigh(){
-    //Shifter.set(true);
+    Shifter.set(true);
   }
 
   public void shiftToLow(){
-    //Shifter.set(false);
+    Shifter.set(false);
   }
 
 
