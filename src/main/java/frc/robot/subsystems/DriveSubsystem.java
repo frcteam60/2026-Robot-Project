@@ -134,10 +134,11 @@ public class DriveSubsystem extends SubsystemBase {
     var rightFollowerConfigurator = rightFollower.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
-    // enable stator current limit
+    // enable stator current limit\
+    limitConfigs.SupplyCurrentLimitEnable = true;
+    limitConfigs.StatorCurrentLimitEnable = true;
     limitConfigs.StatorCurrentLimit = 80;
     limitConfigs.SupplyCurrentLimit = 40;
-    limitConfigs.StatorCurrentLimitEnable = true;
     
 
     leftLeaderConfigurator.apply(limitConfigs);
@@ -263,8 +264,13 @@ public class DriveSubsystem extends SubsystemBase {
    * @param poseMeters
    */
   public void setRobotPose(Pose2d poseMeters){
-    poseEstimator.resetPose(poseMeters);
     gyroThePirate.setAngleAdjustment(poseMeters.getRotation().getDegrees());
+    poseEstimator.resetPosition(new Rotation2d(poseMeters.getRotation().getRadians()),
+                                0,
+                                0,
+                                poseMeters);
+    //poseEstimator.resetPose(poseMeters);
+  
   }
   /**
    * field centric drive 

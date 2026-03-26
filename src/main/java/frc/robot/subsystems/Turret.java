@@ -52,6 +52,8 @@ public class Turret extends SubsystemBase {
   private char activeHub = 'T';
   private boolean isHubActive;
   private boolean shouldItTrack;
+  /** if the turret is aligned with the target */
+  private boolean isAligned = false;
   private boolean ifInManual = false;
   /** desired anlge of turret relative to the robot in rotations of the motor */
   private double desiredAngleOfTurret;
@@ -59,6 +61,7 @@ public class Turret extends SubsystemBase {
   /**
    * if auto shooting in manual */
   private boolean ifAutoShooting = false;
+  private double disToTarget = 0.9144;
   private double speedIWant = 2000;
 
   private Timer timer = new Timer();
@@ -75,7 +78,7 @@ public class Turret extends SubsystemBase {
   /** Creates a new CANBallSubsystem. */
   public Turret() {
     
-    
+    //Alex is the gretest. He should henseforth be known as Alex Magnum Opus!!!
     robotPose = new Pose2d();
 
     desiredAngleOfTurret = 0;
@@ -83,9 +86,13 @@ public class Turret extends SubsystemBase {
     leftFlyWheelSparkMax = new SparkMax(Left_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     rightFlyWheelSparkMax = new SparkMax(Right_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     angleOfTurretSparkMax = new SparkMax(Angle_MOTOR_ID, MotorType.kBrushless);
+    //i was 0.002
+    angleOfTurretPIDController = new PIDController(0.07, 0.0, 0.0001);
+    angleOfTurretPIDController.setIntegratorRange(-0.2, 0.2);
 
-    angleOfTurretPIDController = new PIDController(0.07, 0.003, 0.0001);
-    flyWheelPidController = new PIDController(0.0001, 0.0, 0.0);
+    //flyWheelPidController = new PIDController(0.0001, 0.0, 0.0);
+    flyWheelPidController = new PIDController(0.0001,0,0.0001); //(0.00015, 0.00001, 0.000005);
+    //angleOfTurretPIDController.setIntegratorRange(-0.01, 0.01);
 
     turretEncoder = new DutyCycleEncoder(0);
     turretEncoder.setInverted(true);
@@ -154,8 +161,8 @@ public class Turret extends SubsystemBase {
       //SmartDashboard.putBoolean("if in try tracking", shouldItTrack);
       SmartDashboard.putNumber("shooter speed in rpms", rightFlyWheelSparkMax.getEncoder().getVelocity());
       //SmartDashboard.putNumber("dis wheels speed", -getFlywheelSpeed(getDistanceBetween(correctedRobotPose, target)));
-      //SmartDashboard.putNumber("Speed i Speed for shootting", speedIWant);
-
+      SmartDashboard.putNumber("Speed i Speed for shooting", speedIWant);
+      SmartDashboard.putNumber("dis to target for shooting", disToTarget);
       SmartDashboard.putNumber("robot angle rotations", robotPose.getRotation().getRotations());
 
 
@@ -310,7 +317,7 @@ public class Turret extends SubsystemBase {
    */
   public double setFlyWheelSpeed(double speed) {
     SmartDashboard.putNumber("pid", flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed));
-    rightFlyWheelSparkMax.set(((speed/5580)+(flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed))));
+    rightFlyWheelSparkMax.set((((speed/5698)*0.98)+(flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed))));
     //rightFlyWheelSparkMax.set((speed/5350));
     //rightFlyWheelSparkMax.set(flyWheelPidController.calculate(rightFlyWheelSparkMax.getEncoder().getVelocity(), speed));
     return rightFlyWheelSparkMax.getEncoder().getVelocity();
@@ -418,8 +425,14 @@ public class Turret extends SubsystemBase {
   public Command feed(Feeder feeder, Intake intake){
     return run(
         () -> {
-      feeder.setFeedSpeed(-1);
-      intake.setHungrySpeed(0.5);
+      if(ifInManual){
+        feeder.setFeedSpeed(-1);
+        intake.setHungrySpeed(0.5);
+      }else if(isAligned){
+        feeder.setFeedSpeed(-1);
+        intake.setHungrySpeed(0.5);
+      }
+      
     });
   }
 
@@ -462,9 +475,10 @@ public class Turret extends SubsystemBase {
    * this will be runing in the back ground
    */
   public void hoodTrack(){
-    if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotPose, target))-hood.getLastAngle()) > 3){
-          hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
-    }
+    // if(Math.abs(getHoodAngle(getDistanceBetween(correctedRobotPose, target))-hood.getLastAngle()) > 3){
+    //       hood.setAngle(getHoodAngle(getDistanceBetween(correctedRobotPose, target)));
+    // }
+    hood.setAngle(getHoodAngle(disToTarget));
   }
 
   /**
@@ -527,18 +541,23 @@ public class Turret extends SubsystemBase {
     //SmartDashboard.putNumber("dis to hub Y", (BLUE_HUB.getY()-correctedRobotPose.getY()));
     
     //SmartDashboard.putNumber("angle atan2", Math.atan2((BLUE_HUB.getY()-correctedRobotPose.getY()), (BLUE_HUB.getX()-correctedRobotPose.getX()))/**(1.0/10.0)*(1.0/25.0)*Math.PI*2.0*/);
-    /**angle of the turre field contric */
+    /**desiared angle of the turre field contric in rortains*/
     double angleOfTurretFieldCen = (Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0));
     SmartDashboard.putNumber("desired angle field centric", angleOfTurretFieldCen);
     //desiredAngleOfTurret = (Math.atan2((BLUE_HUB.getX()-correctedRobotPose.getX()), (BLUE_HUB.getY()-correctedRobotPose.getY()))*(1.0/10.0)*(1.0/25.0)*Math.PI*2.0);
     //SmartDashboard.putNumber("tracking arctan", Math.atan2((target.getY()-robotPose.getY()), (target.getX()-robotPose.getX()))/(Math.PI*2.0));
     // 250 was 160
-    double tempAngle = -(angleSubtractRotations(robotPose.getRotation().getRotations(), angleOfTurretFieldCen)*250);
-    SmartDashboard.putNumber("desired rotations of the neo550", tempAngle);
-    if(isInRange(90, -90, tempAngle)){
-      desiredAngleOfTurret = tempAngle;
+    if (Math.tan(Math.toRadians(angleSubtractRotations(angleOfTurretSparkMax.getEncoder().getPosition()*250, angleOfTurretFieldCen)))*getDistanceBetween(target, robotPose) < 0.9) {
+      isAligned = true;
+    }else{
+      isAligned = false;
     }
-    //desiredAngleOfTurret = tempAngle;
+    double tempAngle = -(angleSubtractRotations(robotPose.getRotation().getRotations(), angleOfTurretFieldCen)*250);
+    SmartDashboard.putNumber("desired rotations of the neo550", tempAngle); 
+    // if(isInRange(90, -90, tempAngle)){
+    //   desiredAngleOfTurret = tempAngle;
+    // }
+    desiredAngleOfTurret = tempAngle;
   
   }
 
@@ -550,7 +569,7 @@ public class Turret extends SubsystemBase {
    */
   public double getFlywheelSpeed(double dis){
     //return (6.56+0.0725*dis+0.0606*Math.pow(dis, 2))*30/Math.PI/0.0254;
-    return (3069-208*dis+117*Math.pow(dis, 2));
+    return (3069-208*dis+117*Math.pow(dis, 2))*0.95;
   }
   /**
    * return the desired hood angle
@@ -645,12 +664,15 @@ public class Turret extends SubsystemBase {
 
   public void resetAngleOfTurret(){
     //if the abs encoder is unplugged dont use it
-    double absEncoder = turretEncoder.get();
-    if(Double.isNaN(absEncoder)){
+    //angleOfTurretSparkMax.getEncoder().setPosition(0);
+
+    //double absEncoder turretEncoder= .get();
+    if(turretEncoder.isConnected()){
+      angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), TURRET_ABS_OFFSET));
+      
+    } else{
       angleOfTurretSparkMax.getEncoder().setPosition(0);
       System.out.println("The Abs Encoder Is Unplugged \n\n\n");
-    } else{
-      angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(absEncoder, TURRET_ABS_OFFSET));
     }
     //angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), TURRET_ABS_OFFSET));
     //angleOfTurretSparkMax.getEncoder().setPosition(25.0*angleSubtractRotations(turretEncoder.get(), offSet));
@@ -756,7 +778,12 @@ public class Turret extends SubsystemBase {
   public Command a(){
     return runOnce(
         () -> {
-      speedIWant -= 100;
+      if(ifInManual){
+        disToTarget -= 0.4572; 
+      }else{
+        speedIWant -= 50;
+      }
+      //speedIWant -= 50;
     });
     
   }
@@ -778,7 +805,12 @@ public class Turret extends SubsystemBase {
   public Command y(){
     return runOnce(
         () -> {
-      speedIWant += 100; 
+      if(ifInManual){
+        disToTarget += 0.9144; 
+      }else{
+        speedIWant += 50;
+      }
+      //speedIWant += 100; 
       
     });
     

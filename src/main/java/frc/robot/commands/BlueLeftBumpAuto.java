@@ -33,7 +33,8 @@ public class BlueLeftBumpAuto extends SequentialCommandGroup {
     // intentionally creates a command which does not end which allows us to control
     // the timing using the withTimeout decorator
     new SetPoseAtStartOfAuto(driveSubsystem, LEFT_BLUE_BUMP),
-    new LaunchSequence(turret, chimney, intake).withTimeout(15));
+    new LaunchSequence(turret, chimney, intake).withTimeout(15),
+    new Stop(turret, chimney, intake));
     //new Launch(turret, chimney, intake).withTimeout(6));
     //driveAndPickUp,
     //new AutoDriveToPose(driveSubsystem, -0.5,  new Pose2d(3.5, 23749., null)),

@@ -116,8 +116,8 @@ public class RobotContainer {
     //operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0.0));
     //operatorController.b().whileTrue(new IntakeBalls(HungryIntake, -0.85));
 
-    operatorController.b().whileTrue(HungryIntake.setHungrySpeedCommand(-1));
-    operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0));
+    // operatorController.b().whileTrue(HungryIntake.setHungrySpeedCommand(-1));
+    // operatorController.b().onFalse(HungryIntake.setHungrySpeedCommand(0));
 
     operatorController.leftTrigger().whileTrue(shooter.feed(chimney, HungryIntake));
     // operatorController.leftTrigger().whileTrue(chimney.setSpeedCommand(-1));
@@ -150,14 +150,14 @@ public class RobotContainer {
     // operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
 
-    // operatorController.a().onTrue(shooter.a());
-    // operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    operatorController.a().onTrue(shooter.a());
+    operatorController.a().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    // operatorController.b().whileTrue(shooter.b());
-    // operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    operatorController.b().whileTrue(shooter.b());
+    operatorController.b().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
-    // operatorController.y().onTrue(shooter.y());
-    // operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
+    operatorController.y().onTrue(shooter.y());
+    operatorController.y().onFalse(shooter.setFlyWheelSpeedCommand(0));
 
 
     // operatorController.a().onTrue(shooter.setDesiredTurretAngleCommand(85));
@@ -195,8 +195,8 @@ public class RobotContainer {
     vroomVroomStick.povLeft().whileTrue(driveSubsystem.turnToAngle(270));
 
 
-    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToHigh));
-    vroomVroomStick.button(1).onFalse(Commands.runOnce(driveSubsystem::shiftToLow));
+    vroomVroomStick.button(1).onFalse(Commands.runOnce(driveSubsystem::shiftToHigh));
+    vroomVroomStick.button(1).onTrue(Commands.runOnce(driveSubsystem::shiftToLow));
 
     vroomVroomStick.button(5).onTrue(Commands.runOnce(driveSubsystem::HighJerk));
     vroomVroomStick.button(5).onFalse(Commands.runOnce(driveSubsystem::noJerk));
@@ -235,7 +235,7 @@ public class RobotContainer {
    */
   public void teleopPeriodic(){
     //driveSubsystem.autoShiftGears();
-    shooter.trackTarget();
+    //shooter.trackTarget();
     shooter.hoodTrack();
     shooter.flyWheelSpin(-MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));
     //shooter.joyStickServo(MathUtil.applyDeadband(operatorController.getLeftY(), 0.05));

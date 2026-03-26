@@ -30,15 +30,15 @@ public final class Constants {
 
     // Current limit for drivetrain motors. 60A is a reasonable maximum to reduce
     // likelihood of tripping breakers or damaging CIM motors
-    public static final int DRIVE_MOTOR_CURRENT_LIMIT = 60;
+    //public static final int DRIVE_MOTOR_CURRENT_LIMIT = 60;
   }
 
   public static final class FuelConstants {
     public static final int HOOD_ID = 0;
-    public static final double INTAKING_HUNGRY_SPEED = 6.0;
+
     public static final int HUNGRY_MOTOR_ID = 6;
     public static final int HUNGRY_MOTOR_CURRENT_LIMIT = 40;
-    public static final int FEEDER_MOTOR_CURRENT_LIMIT = 40;
+    public static final int FEEDER_MOTOR_CURRENT_LIMIT = 30;
     // turrets pose
     public static final double centerOfRobotToTurret = 0.187;
     /**
@@ -51,22 +51,22 @@ public final class Constants {
 
 
     public static final Pose2d RIGHT_BLUE_BUMP = new Pose2d(3.57, 2.52, new Rotation2d(0));
-
-    public static final Pose2d LEFT_RED_BUMP = new Pose2d(12.7, 2.52, new Rotation2d(Math.PI));
-
+    
     public static final Pose2d LEFT_BLUE_BUMP = new Pose2d(3.57, 5.54, new Rotation2d(0));
-
-    public static final Pose2d RIGHT_RED_BUMP = new Pose2d(12.7, 5.54, new Rotation2d(Math.PI));
 
     public static final Pose2d BLUE_CENTER_AUTO_START = new Pose2d(3.57, 4.03, new Rotation2d(0));
 
-    public static final Pose2d RED_CENTER_AUTO_START = new Pose2d(12.7, 4.03, new Rotation2d(Math.PI));
+    public static final Pose2d RIGHT_RED_BUMP = new Pose2d(12.96, 5.54, new Rotation2d(Math.PI));
+
+    public static final Pose2d LEFT_RED_BUMP = new Pose2d(12.96, 2.52, new Rotation2d(Math.PI));
+
+    public static final Pose2d RED_CENTER_AUTO_START = new Pose2d(12.96, 4.03, new Rotation2d(Math.PI));
 
     /** time ball take from shooter to hub */
     public static final double TIME_OF_FLIGHT = 1.16;
 
     /** what the abs encoder reads when the turret if facing straight */
-    public static final double TURRET_ABS_OFFSET = 0.8;
+    public static final double TURRET_ABS_OFFSET = 0.324;
 
 
     // Motor controller IDs for Fuel Mechanism motors
@@ -76,9 +76,9 @@ public final class Constants {
     public static final int Right_LAUNCHER_MOTOR_ID = 7;
 
     // Current limit and nominal voltage for fuel mechanism motors.   print("hello world")
-    public static final int Angle_MOTOR_CURRENT_LIMIT = 20;
-    public static final int Left_MOTOR_CURRENT_LIMIT = 60;
-    public static final int Right_MOTOR_CURRENT_LIMIT = 60;
+    public static final int Angle_MOTOR_CURRENT_LIMIT = 10;
+    public static final int Left_MOTOR_CURRENT_LIMIT = 50;
+    public static final int Right_MOTOR_CURRENT_LIMIT = 50;
 
 
   }
